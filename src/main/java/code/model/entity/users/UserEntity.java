@@ -1,7 +1,8 @@
 package code.model.entity.users;
 
-import code.model.entity.notification.ChatMessageEntity;
+import code.model.entity.chatting.ChatMessageEntity;
 import code.model.entity.notification.NotificationEntity;
+import code.model.entity.rating.ReviewsEntity;
 import code.model.entity.rooms.RoomEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -56,6 +57,12 @@ public class UserEntity {
 
     @OneToMany(mappedBy = "userReceiver")
     private List<NotificationEntity> notifications;
+
+    @OneToMany(mappedBy = "userRated")
+    private List<ReviewsEntity> reviewsRated;
+
+    @OneToMany(mappedBy = "userReplied")
+    private List<ReviewsEntity> reviewsReplied;
 
 
 

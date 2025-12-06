@@ -1,4 +1,4 @@
-package code.model.entity.notification;
+package code.model.entity.chatting;
 
 import code.model.entity.rooms.RoomEntity;
 import code.model.entity.users.UserEntity;

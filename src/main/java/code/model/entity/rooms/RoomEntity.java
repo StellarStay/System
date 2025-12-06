@@ -1,7 +1,8 @@
 package code.model.entity.rooms;
 
 import code.model.entity.booking.BookingEntity;
-import code.model.entity.notification.ChatMessageEntity;
+import code.model.entity.chatting.ChatMessageEntity;
+import code.model.entity.rating.ReviewsEntity;
 import code.model.entity.users.UserEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -52,7 +53,10 @@ public class RoomEntity {
     @OneToMany(mappedBy = "room")
     private List<BookingEntity> bookings;
 
-    @OneToMany
+    @OneToMany(mappedBy = "room")
     private List<ChatMessageEntity> chatMessages;
+
+    @OneToMany(mappedBy = "room")
+    private List<ReviewsEntity> reviews;
 
 }
