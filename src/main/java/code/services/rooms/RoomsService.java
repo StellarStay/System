@@ -11,6 +11,6 @@ public interface RoomsService {
     boolean updateRoom(String roomId, RoomRequestDTO roomRequestDTO);
     boolean deleteRoom(String roomId);
     List<RoomEntity> getAllRooms();
-    RoomRequestDTO getRoomById(String roomId);
+    RoomEntity getRoomById(String roomId);
 
 }

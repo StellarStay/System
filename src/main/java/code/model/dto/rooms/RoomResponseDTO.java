@@ -25,6 +25,4 @@ public class RoomResponseDTO {
     private String categoryName;
 //    private UserEntity owner; // owner có nghĩa là chủ phòng
     private String ownerName;
-    private List<String> imageRooms;
-
 }

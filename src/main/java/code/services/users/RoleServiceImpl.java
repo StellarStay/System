@@ -17,7 +17,11 @@ public class RoleServiceImpl implements RoleService {
     int max_length_id = 8;
 
     private String generateRoleId() {
-        return RandomId.generateRoomId(max_length_id);
+        String randomId;
+        do{
+            randomId = RandomId.generateRoomId(max_length_id);
+        }while(roleRepository.findById(randomId).isPresent());
+        return randomId;
     }
 
     @Override
@@ -26,6 +30,7 @@ public class RoleServiceImpl implements RoleService {
         roleEntity.setRoleId(generateRoleId());
         roleEntity.setRoleName(roleRequestDTO.getRoleName());
         roleEntity.setDescription(roleRequestDTO.getDescription());
+        roleRepository.save(roleEntity);
         return true;
     }
 
@@ -37,6 +42,7 @@ public class RoleServiceImpl implements RoleService {
         } else {
             roleEntity.setRoleName(roleRequestDTO.getRoleName());
             roleEntity.setDescription(roleRequestDTO.getDescription());
+            roleRepository.save(roleEntity);
             return true;
         }
     }

@@ -17,8 +17,7 @@ public class RoomRequestDTO {
     private String address;
     private BigDecimal price_per_night;
     private int max_guests;
-//    private String status; PENDING, APPROVED, REJECTED, BLOCKED, Nếu là chủ phòng create phòng thì luôn là trạng thái PENDING, chờ admin duyệt rồi mới chuyển qua các trạng thái còn lại
+    private String status; // PENDING, APPROVED, REJECTED, BLOCKED, Nếu là chủ phòng create phòng thì luôn là trạng thái PENDING, chờ admin duyệt rồi mới chuyển qua các trạng thái còn lại
     private String categoriesId;
     private String ownerId; // owner có nghĩa là chủ phòng
-    private List<String> imageRoomsId;
 }
