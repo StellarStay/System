@@ -15,7 +15,7 @@ import java.util.List;
 public class RoleEntity {
     @Id
     @Column(name = "role_id", nullable = false)
-    private int roleId;
+    private String roleId;
     @Column(name = "role_name", nullable = false, unique = true)
     private String roleName;
     @Column(name = "description", nullable = true)
