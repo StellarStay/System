@@ -25,7 +25,7 @@ public class BookingEntity {
     @Column(name = "check_out_time", nullable = false)
     private LocalDateTime checkOutTime;
     @Column(name = "status", nullable = false)
-    private String status; // Chỗ này thì status là PENDING, CONFIRM, CANCELLED
+    private String status; // Chỗ này thì status là PENDING, CONFIRM, CANCELLED, COMPLETED
     @Column(name = "total_price", nullable = false)
     private BigDecimal totalPrice;
 

@@ -59,4 +59,7 @@ public class RoomEntity {
     @OneToMany(mappedBy = "room")
     private List<ReviewsEntity> reviews;
 
+    @OneToMany(mappedBy = "room")
+    private List<DeviceOfRoomEntity> devicesInRoom;
+
 }

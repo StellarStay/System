@@ -1,3 +1,4 @@
+// java
 package code.config;
 
 import code.model.entity.booking.BookingEntity;
@@ -10,6 +11,8 @@ import code.model.entity.rating.ReviewsEntity;
 import code.model.entity.rooms.CategoriesRoomEntity;
 import code.model.entity.rooms.ImageRoomEntity;
 import code.model.entity.rooms.RoomEntity;
+import code.model.entity.rooms.DevicesEntity;
+import code.model.entity.rooms.DeviceOfRoomEntity;
 import code.model.entity.users.RoleEntity;
 import code.model.entity.users.UserEntity;
 import code.repository.booking.BookingRepository;
@@ -22,6 +25,8 @@ import code.repository.rating.ReviewsRepository;
 import code.repository.rooms.CategoriesRoomRepository;
 import code.repository.rooms.ImageRoomRepository;
 import code.repository.rooms.RoomRepository;
+import code.repository.rooms.DevicesRepository;
+import code.repository.rooms.DeviceOfRoomRepository;
 import code.repository.users.RoleRepository;
 import code.repository.users.UserRepository;
 import code.util.RandomId;
@@ -58,6 +63,10 @@ public class DataInit implements CommandLineRunner {
     private ReviewsRepository reviewsRepository;
     @Autowired
     private ChatMessageRepository chatMessageRepository;
+    @Autowired
+    private DevicesRepository devicesRepository;
+    @Autowired
+    private DeviceOfRoomRepository deviceOfRoomRepository;
 
 
     @Override
@@ -288,6 +297,83 @@ public class DataInit implements CommandLineRunner {
         img4_1.setCreatedAt(LocalDateTime.now());
         img4_1.setRoom(room4);
         imageRoomRepository.save(img4_1);
+
+        // 5.a Tạo Devices
+        DevicesEntity tv = new DevicesEntity();
+        tv.setDeviceId(RandomId.generateRoomId(10));
+        tv.setDeviceName("Smart TV");
+        tv.setDeviceType("Entertainment");
+        tv.setBrand("Samsung");
+        devicesRepository.save(tv);
+
+        DevicesEntity ac = new DevicesEntity();
+        ac.setDeviceId(RandomId.generateRoomId(10));
+        ac.setDeviceName("Air Conditioner");
+        ac.setDeviceType("Climate");
+        ac.setBrand("Daikin");
+        devicesRepository.save(ac);
+
+        DevicesEntity fridge = new DevicesEntity();
+        fridge.setDeviceId(RandomId.generateRoomId(10));
+        fridge.setDeviceName("Refrigerator");
+        fridge.setDeviceType("Appliance");
+        fridge.setBrand("Panasonic");
+        devicesRepository.save(fridge);
+
+        DevicesEntity wifi = new DevicesEntity();
+        wifi.setDeviceId(RandomId.generateRoomId(10));
+        wifi.setDeviceName("WiFi Router");
+        wifi.setDeviceType("Network");
+        wifi.setBrand("TP-Link");
+        devicesRepository.save(wifi);
+
+        DevicesEntity kettle = new DevicesEntity();
+        kettle.setDeviceId(RandomId.generateRoomId(10));
+        kettle.setDeviceName("Electric Kettle");
+        kettle.setDeviceType("Appliance");
+        kettle.setBrand("Philips");
+        devicesRepository.save(kettle);
+
+        // 5.b Link Devices to Rooms (DeviceOfRoom)
+        DeviceOfRoomEntity d1 = new DeviceOfRoomEntity();
+        d1.setDeviceOfRoomId(RandomId.generateRoomId(10));
+        d1.setStatus(true);
+        d1.setCreatedDate(LocalDateTime.now());
+        d1.setDevice(tv);
+        d1.setRoom(room1);
+        deviceOfRoomRepository.save(d1);
+
+        DeviceOfRoomEntity d2 = new DeviceOfRoomEntity();
+        d2.setDeviceOfRoomId(RandomId.generateRoomId(10));
+        d2.setStatus(true);
+        d2.setCreatedDate(LocalDateTime.now());
+        d2.setDevice(ac);
+        d2.setRoom(room1);
+        deviceOfRoomRepository.save(d2);
+
+        DeviceOfRoomEntity d3 = new DeviceOfRoomEntity();
+        d3.setDeviceOfRoomId(RandomId.generateRoomId(10));
+        d3.setStatus(true);
+        d3.setCreatedDate(LocalDateTime.now());
+        d3.setDevice(wifi);
+        d3.setRoom(room2);
+        deviceOfRoomRepository.save(d3);
+
+        DeviceOfRoomEntity d4 = new DeviceOfRoomEntity();
+        d4.setDeviceOfRoomId(RandomId.generateRoomId(10));
+        d4.setStatus(true);
+        d4.setCreatedDate(LocalDateTime.now());
+        d4.setDevice(fridge);
+        d4.setRoom(room3);
+        deviceOfRoomRepository.save(d4);
+
+        DeviceOfRoomEntity d5 = new DeviceOfRoomEntity();
+        d5.setDeviceOfRoomId(RandomId.generateRoomId(10));
+        d5.setStatus(false);
+        d5.setCreatedDate(LocalDateTime.now());
+        d5.setDevice(kettle);
+        d5.setRoom(room4);
+        deviceOfRoomRepository.save(d5);
 
         // 6. Tạo Payment Methods
         PaymentMethodEntity cashMethod = new PaymentMethodEntity();
@@ -557,6 +643,8 @@ public class DataInit implements CommandLineRunner {
         System.out.println("   - Categories: 4");
         System.out.println("   - Rooms: 5");
         System.out.println("   - Images: 5");
+        System.out.println("   - Devices: 5");
+        System.out.println("   - Device assignments: 5");
         System.out.println("   - Payment Methods: 4");
         System.out.println("   - Bookings: 4");
         System.out.println("   - Payments: 4");
