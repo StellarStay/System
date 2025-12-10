@@ -51,7 +51,9 @@ public class BookingServiceImpl implements BookingService {
         if (!isRoomAvailable) {
             return false;
         }
+        // Tính số đêm
         int nightForBook = Math.toIntExact(ChronoUnit.DAYS.between(bookingRequestDTO.getCheckInTime(), bookingRequestDTO.getCheckOutTime()));
+        // Tính tiền = tiền/đêm * số đêm
         BigDecimal priceForBook = (BigDecimal.valueOf(nightForBook).multiply(roomBooked.getPrice_per_night()));
         // Tính giá cho booking
         BookingEntity bookingEntity = new BookingEntity();
@@ -69,22 +71,43 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public boolean updateBooking(String bookingId, BookingRequestDTO bookingRequestDTO) {
-        return false;
+        // Phần update này chỉ dành cho Host/Admin và nó chỉ được update khi nào mà khách hàng đã book và đã chuyển tiền thành công thì mới được update từ PENDING --> CONFIRMED
+
+        BookingEntity bookingEntity = bookingRepository.findById(bookingId).orElse(null);
+        RoomEntity roomBooked = roomsService.getRoomById(bookingRequestDTO.getRoomId());
+        UserEntity userBook = userService.getUser(bookingRequestDTO.getUserId());
+        if (bookingEntity == null) {
+            return false;
+        }
+        bookingEntity.setStatus(bookingRequestDTO.getStatus());
+        bookingEntity.setCheckInTime(bookingRequestDTO.getCheckInTime());
+        bookingEntity.setCheckOutTime(bookingRequestDTO.getCheckOutTime());
+        bookingEntity.setStatus(bookingRequestDTO.getStatus());
+        bookingEntity.setRoom(roomBooked);
+        bookingEntity.setUser(userBook);
+        bookingRepository.save(bookingEntity);
+        return true;
     }
 
     @Override
     public boolean cancelBooking(String bookingId) {
-        return false;
+        BookingEntity bookingEntity = bookingRepository.findById(bookingId).orElse(null);
+        if (bookingEntity == null) {
+            return false;
+        }
+        bookingEntity.setStatus("CANCELLED");
+        bookingRepository.save(bookingEntity);
+        return true;
     }
 
     @Override
     public List<BookingEntity> getAllBookings() {
-        return List.of();
+        return bookingRepository.findAll();
     }
 
     @Override
     public BookingEntity getBookingById(String bookingId) {
-        return null;
+        return bookingRepository.findById(bookingId).orElse(null);
     }
 
     @Override
@@ -115,3 +138,6 @@ public class BookingServiceImpl implements BookingService {
         return true;
     }
 }
+
+// Có một trường hợp khi khách booking, nó sẽ ghi nhận vào trong booking với trạng thái PENDING
+// Khi khách hoàn tất thông tin nhưng không thanh toán hoặc thoát ra khỏi trang web thì trạng thái sẽ phải tự động chuyển về CANCELLED sau khoảng 2'
