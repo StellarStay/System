@@ -8,5 +8,6 @@ import java.util.List;
 
 @Repository
 public interface BookingRepository extends JpaRepository<BookingEntity, String> {
-    List<BookingEntity> findByRoomId(String roomId);
+    // RoomEntity primary key field is `roomId`, so the derived query must traverse room.
+    List<BookingEntity> findByRoom_RoomId(String roomId);
 }

@@ -35,6 +35,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Component
@@ -71,9 +72,13 @@ public class DataInit implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        if (userRepository.count() > 0) {
-            return; // Data already initialized
+        // Kiểm tra nếu đã có dữ liệu thì không init lại
+        if (roleRepository.count() > 0 || userRepository.count() > 0 || bookingRepository.count() > 0) {
+            System.out.println("⚠️ Data already exists. Skipping initialization.");
+            return;
         }
+
+        System.out.println("🚀 Starting data initialization...");
 
         // 1. Tạo Roles
         RoleEntity adminRole = new RoleEntity();
@@ -100,7 +105,7 @@ public class DataInit implements CommandLineRunner {
         admin.setIdCard("123456789");
         admin.setFirstName("Admin");
         admin.setLastName("System");
-        admin.setDateOfBirth(LocalDateTime.of(1990, 1, 1, 0, 0));
+        admin.setDateOfBirth(LocalDate.of(1990, 1, 1));
         admin.setPhone("0901234567");
         admin.setEmail("admin@bookingroom.com");
         admin.setPassword("$2a$10$xQ8mP5eqY3zN8b7T1h9OQudYzqXRjGQKh5TlYqF9bQxN3Y5eqX8zO"); // password: admin123
@@ -115,7 +120,7 @@ public class DataInit implements CommandLineRunner {
         owner1.setIdCard("987654321");
         owner1.setFirstName("Nguyen");
         owner1.setLastName("Van A");
-        owner1.setDateOfBirth(LocalDateTime.of(1985, 5, 15, 0, 0));
+        owner1.setDateOfBirth(LocalDate.of(1985, 5, 15));
         owner1.setPhone("0912345678");
         owner1.setEmail("owner1@gmail.com");
         owner1.setPassword("$2a$10$xQ8mP5eqY3zN8b7T1h9OQudYzqXRjGQKh5TlYqF9bQxN3Y5eqX8zO"); // password: owner123
@@ -130,7 +135,7 @@ public class DataInit implements CommandLineRunner {
         owner2.setIdCard("456789123");
         owner2.setFirstName("Tran");
         owner2.setLastName("Thi B");
-        owner2.setDateOfBirth(LocalDateTime.of(1988, 8, 20, 0, 0));
+        owner2.setDateOfBirth(LocalDate.of(1988, 8, 20));
         owner2.setPhone("0923456789");
         owner2.setEmail("owner2@gmail.com");
         owner2.setPassword("$2a$10$xQ8mP5eqY3zN8b7T1h9OQudYzqXRjGQKh5TlYqF9bQxN3Y5eqX8zO");
@@ -145,7 +150,7 @@ public class DataInit implements CommandLineRunner {
         user1.setIdCard("147258369");
         user1.setFirstName("Le");
         user1.setLastName("Van C");
-        user1.setDateOfBirth(LocalDateTime.of(1995, 3, 10, 0, 0));
+        user1.setDateOfBirth(LocalDate.of(1995, 3, 10));
         user1.setPhone("0934567890");
         user1.setEmail("user1@gmail.com");
         user1.setPassword("$2a$10$xQ8mP5eqY3zN8b7T1h9OQudYzqXRjGQKh5TlYqF9bQxN3Y5eqX8zO"); // password: user123
@@ -160,7 +165,7 @@ public class DataInit implements CommandLineRunner {
         user2.setIdCard("369258147");
         user2.setFirstName("Pham");
         user2.setLastName("Thi D");
-        user2.setDateOfBirth(LocalDateTime.of(1998, 12, 25, 0, 0));
+        user2.setDateOfBirth(LocalDate.of(1998, 12, 25));
         user2.setPhone("0945678901");
         user2.setEmail("user2@gmail.com");
         user2.setPassword("$2a$10$xQ8mP5eqY3zN8b7T1h9OQudYzqXRjGQKh5TlYqF9bQxN3Y5eqX8zO");
@@ -654,3 +659,4 @@ public class DataInit implements CommandLineRunner {
         System.out.println("   - Chat Messages: 6");
     }
 }
+

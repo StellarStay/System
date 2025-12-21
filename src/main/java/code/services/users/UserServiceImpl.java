@@ -8,6 +8,7 @@ import code.util.RandomId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -37,11 +38,13 @@ public class UserServiceImpl implements UserService {
         userEntity.setEmail(userRequestDTO.getEmail());
         userEntity.setPassword(userRequestDTO.getPassword());
         userEntity.setGender(userRequestDTO.isGender());
+        userEntity.setCreatedAt(LocalDateTime.now());
 
         RoleEntity roleEntity = new RoleEntity();
         roleEntity.setRoleId(userRequestDTO.getRoleId());
 
         userEntity.setRole(roleEntity);
+        userEntity.setStatus(true);
         userRepository.save(userEntity);
         return true;
     }

@@ -121,7 +121,7 @@ public class BookingServiceImpl implements BookingService {
         if (roomToCheck == null) {
             return false;
         }
-        List<BookingEntity> bookingsOfRoom = bookingRepository.findByRoomId(roomId);
+        List<BookingEntity> bookingsOfRoom = bookingRepository.findByRoom_RoomId(roomId);
         for (BookingEntity booking : bookingsOfRoom) {
             boolean checkOverLapping =  (checkInTime.isAfter(booking.getCheckInTime()) && checkInTime.isBefore(booking.getCheckOutTime()))  ||
                     (checkOutTime.isAfter(booking.getCheckInTime()) && checkOutTime.isBefore(booking.getCheckOutTime())) ||
