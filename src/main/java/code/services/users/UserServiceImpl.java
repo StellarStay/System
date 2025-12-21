@@ -93,4 +93,19 @@ public class UserServiceImpl implements UserService {
     public List<UserEntity> getUsers() {
         return userRepository.findAll();
     }
+
+    @Override
+    public boolean isEmailExists(String email) {
+        if (userRepository.existsByEmail(email)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public UserEntity findByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
 }

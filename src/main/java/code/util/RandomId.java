@@ -20,4 +20,16 @@ public class RandomId {
         }
         return stringIdRandom.toString();
     }
+
+    public static String generateOtp(int length) {
+        StringBuilder otp = new StringBuilder(length);
+        String digits = "0123456789";
+
+        for (int i = 0; i < length; i++) {
+            int index = random.nextInt(digits.length());
+            char randomDigit = digits.charAt(index);
+            otp.append(randomDigit);
+        }
+        return otp.toString();
+    }
 }
