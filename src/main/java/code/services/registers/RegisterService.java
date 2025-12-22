@@ -1,7 +1,6 @@
-package code.services.register_login;
+package code.services.registers;
 
 import code.model.dto.users.UserRequestDTO;
-import code.model.entity.users.UserEntity;
 import jakarta.mail.MessagingException;
 
 public interface RegisterService {

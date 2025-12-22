@@ -1,7 +1,6 @@
-package code.services.register_login;
+package code.services.registers;
 
 import code.model.dto.users.UserRequestDTO;
-import code.model.entity.users.UserEntity;
 import code.services.email.EmailService;
 import code.services.users.UserService;
 import code.util.RandomId;
@@ -75,7 +74,7 @@ public class RegisterServiceImpl implements RegisterService {
         tempUser.setIdCard(userRequestDTO.getIdCard());
         tempUser.setPhone(userRequestDTO.getPhone());
         tempUser.setDateOfBirth(userRequestDTO.getDateOfBirth());
-        tempUser.setRoleId(userRequestDTO.getRoleId());
+        tempUser.setRoleId("CvrdbGFd67");
         tempUser.setGender(userRequestDTO.isGender());
         tempUser.setEmail(userRequestDTO.getEmail());
         tempUser.setPassword(encodedPassword);

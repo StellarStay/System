@@ -1,8 +1,7 @@
 package code.controller.users;
 
 import code.model.dto.users.UserRequestDTO;
-import code.model.entity.users.UserEntity;
-import code.services.register_login.RegisterService;
+import code.services.registers.RegisterService;
 import code.services.users.UserService;
 import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;

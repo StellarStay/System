@@ -1,22 +1,49 @@
 package code.config;
 
+import code.services.login.JwTAuthFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-    @Bean
 
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf(csrf -> csrf.disable())  // Tắt CSRF vì dùng REST API
-                .cors(cors -> {})              // Bật CORS, config bên WebConfig
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http, JwTAuthFilter jwtAuthFilter) throws Exception {
+        http
+                .csrf(csrf -> csrf.disable())
+                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .cors(cors -> cors.configurationSource(req -> {
+                    CorsConfiguration c = new CorsConfiguration();
+                    c.setAllowedOrigins(List.of("http://localhost:5173"));
+                    c.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
+                    c.setAllowedHeaders(List.of("*"));
+                    c.setAllowCredentials(true);
+                    return c;
+                }))
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll() // Cho phép tất cả request
+                        // Swagger
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                        // Auth endpoints - Public
+                        .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/refresh").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/verify-otp").permitAll()
+
+                        // Endpoints cần authentication
+                        .anyRequest().authenticated()
                 );
+
+        http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
