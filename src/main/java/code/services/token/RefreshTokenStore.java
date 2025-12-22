@@ -1,4 +1,4 @@
-package code.services.login;
+package code.services.token;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;

@@ -1,6 +1,6 @@
 package code.config;
 
-import code.services.login.JwTAuthFilter;
+import code.services.token.JwTAuthFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;

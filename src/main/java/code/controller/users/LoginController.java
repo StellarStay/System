@@ -3,7 +3,7 @@ package code.controller.users;
 import code.model.dto.login.AuthResponseDTO;
 import code.model.dto.login.LoginRequestDTO;
 import code.model.dto.login.RefreshTokenRequestDTO;
-import code.services.login.AuthService;
+import code.services.token.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;

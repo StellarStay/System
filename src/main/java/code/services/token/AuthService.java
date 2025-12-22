@@ -1,4 +1,4 @@
-package code.services.login;
+package code.services.token;
 
 import code.model.dto.login.AuthResponseDTO;
 import code.model.dto.login.LoginRequestDTO;
