@@ -34,10 +34,8 @@ public class SecurityConfig {
                         // Swagger
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         // Auth endpoints - Public
-                        .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/auth/refresh").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/auth/verify-otp").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/refresh", "/api/auth/register", "/api/auth/verify-otp").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/rooms/get/**").permitAll()
 
                         // Endpoints cần authentication
                         .anyRequest().authenticated()

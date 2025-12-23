@@ -20,9 +20,9 @@ public class BookingEntity {
     @Id
     @Column(name = "booking_id", nullable = false)
     private String bookingId;
-    @Column(name = "check_in_time", nullable = false)
+    @Column(name = "check_in_time", nullable = true)
     private LocalDateTime checkInTime;
-    @Column(name = "check_out_time", nullable = false)
+    @Column(name = "check_out_time", nullable = true)
     private LocalDateTime checkOutTime;
     @Column(name = "status", nullable = false)
     private String status; // Chỗ này thì status là PENDING, CONFIRM, CANCELLED, COMPLETED
@@ -30,7 +30,7 @@ public class BookingEntity {
     private BigDecimal totalPrice;
 
     @ManyToOne
-    @JoinColumn(name = "user_booking_id", nullable = false)
+    @JoinColumn(name = "user_booking_id", nullable = true)
     private UserEntity user;
 
     @ManyToOne

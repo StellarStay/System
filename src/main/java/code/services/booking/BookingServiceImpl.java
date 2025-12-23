@@ -1,6 +1,9 @@
 package code.services.booking;
 
-import code.model.dto.booking.BookingRequestDTO;
+import code.model.dto.booking.GuestBookingRequestDTO;
+import code.model.dto.booking.TempBookingBeforePaymentDTO;
+import code.model.dto.booking.UserBookingRequestDTO;
+import code.model.dto.booking.BookingResponseDTO;
 import code.model.entity.booking.BookingEntity;
 import code.model.entity.rooms.RoomEntity;
 import code.model.entity.users.UserEntity;
@@ -14,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -24,6 +28,8 @@ public class BookingServiceImpl implements BookingService {
     private UserService userService;
     @Autowired
     private RoomsService roomsService;
+    @Autowired
+    private TempBookingService tempBookingService;
 
     int max_length_booking_id = 10;
     private String generateBookingId() {
@@ -35,56 +41,112 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public boolean insertBooking(BookingRequestDTO bookingRequestDTO) {
-        // Khi insert một booking thì trước đó phải kiểm tra trạng thái phòng dựa trong lịch booking xem có bị đè lên không --> nếu có thì không cho insert
-        // Kiểm tra user(đã có tài khoản) và phòng có tồn tại hay không
-        // Tính được giá tiền dựa trên ngày đặt phòng
-
-        RoomEntity roomBooked = roomsService.getRoomById(bookingRequestDTO.getRoomId());
-        UserEntity userBook = userService.getUser(bookingRequestDTO.getUserId());
-
-        if (userBook == null ||  roomBooked == null) {
-            return false;
+    public String prepareGuestBooking(GuestBookingRequestDTO guestBookingRequestDTO) {
+        RoomEntity roomEntity = roomsService.getRoomById(guestBookingRequestDTO.getRoomId());
+        if (roomEntity == null) {
+            return "Room is not exist";
         }
-
-        boolean isRoomAvailable = checkRoomAvailability(bookingRequestDTO.getRoomId(), bookingRequestDTO.getCheckInTime(), bookingRequestDTO.getCheckOutTime());
-        if (!isRoomAvailable) {
-            return false;
+        boolean checkAvailable = checkRoomAvailability(guestBookingRequestDTO.getRoomId(),
+                guestBookingRequestDTO.getCheckInTime(), guestBookingRequestDTO.getCheckOutTime());
+        if (!checkAvailable) {
+            return "Room is not available in selected time";
         }
-        // Tính số đêm
+        int nightForBook = Math.toIntExact(ChronoUnit.DAYS.between(guestBookingRequestDTO.getCheckInTime(), guestBookingRequestDTO.getCheckOutTime()));
+        BigDecimal priceForBook = (BigDecimal.valueOf(nightForBook).multiply(roomEntity.getPrice_per_night()));
+        TempBookingBeforePaymentDTO tempBooking = new TempBookingBeforePaymentDTO();
+        tempBooking.setTempBookingId(generateBookingId());
+        tempBooking.setRoomId(guestBookingRequestDTO.getRoomId());
+        tempBooking.setUserId(null); // Guest không có userId
+        tempBooking.setCheckInTime(null);
+        tempBooking.setCheckOutTime(null);
+        tempBooking.setTotalPrice(priceForBook);
+
+        tempBookingService.save(tempBooking);
+        return "Success: " + tempBooking.getTempBookingId();
+    }
+
+    @Override
+    public String prepareUserBooking(UserBookingRequestDTO bookingRequestDTO, String userId) {
+        RoomEntity roomEntity = roomsService.getRoomById(bookingRequestDTO.getRoomId());
+        UserEntity userEntity = userService.getUser(userId);
+        if (roomEntity == null) {
+            return "Room is not exist";
+        }
+        if (userEntity == null) {
+            return "User is not exist";
+        }
+        boolean checkAvailable = checkRoomAvailability(bookingRequestDTO.getRoomId(),
+                bookingRequestDTO.getCheckInTime(), bookingRequestDTO.getCheckOutTime());
+        if (!checkAvailable) {
+            return "Room is not available in selected time";
+        }
         int nightForBook = Math.toIntExact(ChronoUnit.DAYS.between(bookingRequestDTO.getCheckInTime(), bookingRequestDTO.getCheckOutTime()));
-        // Tính tiền = tiền/đêm * số đêm
-        BigDecimal priceForBook = (BigDecimal.valueOf(nightForBook).multiply(roomBooked.getPrice_per_night()));
-        // Tính giá cho booking
-        BookingEntity bookingEntity = new BookingEntity();
-        bookingEntity.setBookingId(generateBookingId());
-        bookingEntity.setRoom(roomBooked);
-        bookingEntity.setUser(userBook);
-        bookingEntity.setCheckInTime(bookingRequestDTO.getCheckInTime());
-        bookingEntity.setCheckOutTime(bookingRequestDTO.getCheckOutTime());
-        bookingEntity.setStatus("PENDING");
-        bookingEntity.setTotalPrice(priceForBook);
+        BigDecimal priceForBook = (BigDecimal.valueOf(nightForBook).multiply(roomEntity.getPrice_per_night()));
+        TempBookingBeforePaymentDTO tempBooking = new TempBookingBeforePaymentDTO();
+        tempBooking.setTempBookingId(generateBookingId());
+        tempBooking.setRoomId(bookingRequestDTO.getRoomId());
+        tempBooking.setUserId(userId);
+        tempBooking.setCheckInTime(null);
+        tempBooking.setCheckOutTime(null);
+        tempBooking.setTotalPrice(priceForBook);
 
+        tempBookingService.save(tempBooking);
+        return "Success: " + tempBooking.getTempBookingId();
+    }
+
+
+    @Override
+    public BookingEntity insertBookingFromTemp(String tempBookingId) {
+        TempBookingBeforePaymentDTO tempBooking = tempBookingService.get(tempBookingId);
+        if (tempBooking == null) {
+            throw new RuntimeException("TempBooking not found");
+        }
+
+        RoomEntity roomEntity = roomsService.getRoomById(tempBooking.getRoomId());
+        if (roomEntity == null) {
+            throw new RuntimeException("Room is not exist");
+        }
+
+        UserEntity userFromTemp = userService.getUser(tempBooking.getUserId());
+
+        BookingEntity bookingEntity = new BookingEntity();
+        bookingEntity.setBookingId(tempBooking.getTempBookingId());
+        bookingEntity.setRoom(roomEntity);
+        bookingEntity.setUser(userFromTemp); // userFromTemp có thể là null nếu như user không tồn tại
+        bookingEntity.setCheckInTime(null);
+        bookingEntity.setCheckOutTime(null);
+        bookingEntity.setStatus("PENDING");
+        bookingEntity.setTotalPrice(tempBooking.getTotalPrice());
+
+        bookingRepository.save(bookingEntity);
+
+        return bookingEntity;
+    }
+
+    @Override
+    public boolean updateCheckIn(String bookingId, UserBookingRequestDTO userBookingRequestDTO) {
+        // Phần update này chỉ dành cho Host/Admin và nó chỉ được update khi nào mà khách hàng đến nơi và check in
+
+        BookingEntity bookingEntity = bookingRepository.findById(bookingId).orElse(null);
+        if (bookingEntity == null) {
+            return false;
+        }
+        bookingEntity.setStatus("CONFIRMED");
+        bookingEntity.setCheckInTime(LocalDateTime.now());
         bookingRepository.save(bookingEntity);
         return true;
     }
 
     @Override
-    public boolean updateBooking(String bookingId, BookingRequestDTO bookingRequestDTO) {
-        // Phần update này chỉ dành cho Host/Admin và nó chỉ được update khi nào mà khách hàng đã book và đã chuyển tiền thành công thì mới được update từ PENDING --> CONFIRMED
+    public boolean updateCheckOut(String bookingId, UserBookingRequestDTO userBookingRequestDTO) {
+        // Phần update này chỉ dành cho Host/Admin và nó chỉ được update khi nào mà khách hàng đến nơi và check out
 
         BookingEntity bookingEntity = bookingRepository.findById(bookingId).orElse(null);
-        RoomEntity roomBooked = roomsService.getRoomById(bookingRequestDTO.getRoomId());
-        UserEntity userBook = userService.getUser(bookingRequestDTO.getUserId());
         if (bookingEntity == null) {
             return false;
         }
-        bookingEntity.setStatus(bookingRequestDTO.getStatus());
-        bookingEntity.setCheckInTime(bookingRequestDTO.getCheckInTime());
-        bookingEntity.setCheckOutTime(bookingRequestDTO.getCheckOutTime());
-        bookingEntity.setStatus(bookingRequestDTO.getStatus());
-        bookingEntity.setRoom(roomBooked);
-        bookingEntity.setUser(userBook);
+        bookingEntity.setStatus("COMPLETED");
+        bookingEntity.setCheckOutTime(LocalDateTime.now());
         bookingRepository.save(bookingEntity);
         return true;
     }
@@ -99,16 +161,48 @@ public class BookingServiceImpl implements BookingService {
         bookingRepository.save(bookingEntity);
         return true;
     }
-
+//
     @Override
-    public List<BookingEntity> getAllBookings() {
-        return bookingRepository.findAll();
+    public List<BookingResponseDTO> getAllBookings() {
+        List<BookingEntity> bookingEntityList = bookingRepository.findAll();
+        List<BookingResponseDTO> bookingResponseDTOList = new ArrayList<>();
+        for(BookingEntity bookingEntity : bookingEntityList) {
+            BookingResponseDTO bookingResponseDTO = new BookingResponseDTO();
+            bookingResponseDTO.setBookingId(bookingEntity.getBookingId());
+            bookingResponseDTO.setCheckInTime(bookingEntity.getCheckInTime());
+            bookingResponseDTO.setCheckOutTime(bookingEntity.getCheckOutTime());
+            bookingResponseDTO.setStatus(bookingEntity.getStatus());
+            bookingResponseDTO.setTotalPrice(bookingEntity.getTotalPrice());
+            bookingResponseDTO.setUserId(bookingEntity.getUser().getUserId());
+            bookingResponseDTO.setRoomId(bookingEntity.getRoom().getRoomId());
+            bookingResponseDTOList.add(bookingResponseDTO);
+        }
+        return bookingResponseDTOList;
     }
 
     @Override
     public BookingEntity getBookingById(String bookingId) {
         return bookingRepository.findById(bookingId).orElse(null);
     }
+
+    @Override
+    public BookingResponseDTO getBookingResponseById(String bookingId) {
+        BookingEntity bookingEntity = bookingRepository.findById(bookingId).orElse(null);
+        if (bookingEntity == null) {
+            return null;
+        } else {
+            BookingResponseDTO bookingResponseDTO = new BookingResponseDTO();
+            bookingResponseDTO.setBookingId(bookingEntity.getBookingId());
+            bookingResponseDTO.setCheckInTime(bookingEntity.getCheckInTime());
+            bookingResponseDTO.setCheckOutTime(bookingEntity.getCheckOutTime());
+            bookingResponseDTO.setStatus(bookingEntity.getStatus());
+            bookingResponseDTO.setTotalPrice(bookingEntity.getTotalPrice());
+            bookingResponseDTO.setUserId(bookingEntity.getUser().getUserId());
+            bookingResponseDTO.setRoomId(bookingEntity.getRoom().getRoomId());
+            return bookingResponseDTO;
+        }
+    }
+
 
     @Override
     public boolean checkRoomAvailability(String roomId, LocalDateTime checkInTime, LocalDateTime checkOutTime) {
@@ -139,5 +233,3 @@ public class BookingServiceImpl implements BookingService {
     }
 }
 
-// Có một trường hợp khi khách booking, nó sẽ ghi nhận vào trong booking với trạng thái PENDING
-// Khi khách hoàn tất thông tin nhưng không thanh toán hoặc thoát ra khỏi trang web thì trạng thái sẽ phải tự động chuyển về CANCELLED sau khoảng 2'

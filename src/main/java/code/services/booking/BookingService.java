@@ -1,17 +1,29 @@
 package code.services.booking;
 
-import code.model.dto.booking.BookingRequestDTO;
+import code.model.dto.booking.GuestBookingRequestDTO;
+import code.model.dto.booking.UserBookingRequestDTO;
+import code.model.dto.booking.BookingResponseDTO;
 import code.model.entity.booking.BookingEntity;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 public interface BookingService {
-    boolean insertBooking(BookingRequestDTO bookingRequestDTO);
-    boolean updateBooking(String bookingId, BookingRequestDTO bookingRequestDTO);
+    String prepareGuestBooking(GuestBookingRequestDTO guestBookingRequestDTO);
+    String prepareUserBooking(UserBookingRequestDTO bookingRequestDTO, String userId);
+
+    BookingEntity insertBookingFromTemp(String tempBookingId);
+
+
+    boolean updateCheckIn(String bookingId, UserBookingRequestDTO bookingRequestDTO);
+    boolean updateCheckOut(String bookingId, UserBookingRequestDTO bookingRequestDTO);
+
     boolean cancelBooking(String bookingId);
-    List<BookingEntity> getAllBookings();
+
+
+    List<BookingResponseDTO> getAllBookings();
     BookingEntity getBookingById(String bookingId);
+    BookingResponseDTO getBookingResponseById(String bookingId);
 
     boolean checkRoomAvailability(String roomId, LocalDateTime checkInTime, LocalDateTime checkOutTime);
 

@@ -10,8 +10,8 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PaymentRequestDTO {
-    private BigDecimal totalPrice;
-    private String bookingId;
+//    private BigDecimal totalPrice;
+    private String tempBookingId;
     private String paymentMethodId;
 
 }

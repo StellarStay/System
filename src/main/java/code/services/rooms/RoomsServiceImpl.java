@@ -1,6 +1,7 @@
 package code.services.rooms;
 
 import code.model.dto.rooms.RoomRequestDTO;
+import code.model.dto.rooms.RoomResponseDTO;
 import code.model.entity.rooms.CategoriesRoomEntity;
 import code.model.entity.rooms.ImageRoomEntity;
 import code.model.entity.rooms.RoomEntity;
@@ -12,7 +13,9 @@ import code.services.users.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -77,12 +80,140 @@ public class RoomsServiceImpl implements RoomsService{
     }
 
     @Override
-    public List<RoomEntity> getAllRooms() {
-        return roomRepository.findAll();
+    public List<RoomResponseDTO> getAllRooms() {
+        List<RoomEntity> roomEntities = roomRepository.findAll();
+        List<RoomResponseDTO> roomResponseDTOList = new ArrayList<>();
+        for (RoomEntity room : roomEntities) {
+            RoomResponseDTO roomResponseDTO = new RoomResponseDTO();
+            roomResponseDTO.setRoomId(room.getRoomId());
+            roomResponseDTO.setRoomName(room.getRoomName());
+            roomResponseDTO.setTitle(room.getTitle());
+            roomResponseDTO.setDescription(room.getDescription());
+            roomResponseDTO.setAddress(room.getAddress());
+            roomResponseDTO.setPrice_per_night(room.getPrice_per_night());
+            roomResponseDTO.setMax_guests(room.getMax_guests());
+            roomResponseDTO.setStatus(room.getStatus());
+            roomResponseDTO.setCategoryName(room.getCategory().getCategoryName());
+            roomResponseDTO.setOwnerName(room.getOwner().getFirstName() + " " + room.getOwner().getLastName());
+            roomResponseDTOList.add(roomResponseDTO);
+        }
+        return  roomResponseDTOList;
     }
 
     @Override
     public RoomEntity getRoomById(String roomId) {
         return roomRepository.findById(roomId).orElse(null);
+    }
+
+    @Override
+    public RoomResponseDTO getRoomResponseById(String roomId) {
+        RoomEntity roomEntity = roomRepository.findById(roomId).orElse(null);
+        if (roomEntity == null) {
+            return null;
+        }
+        RoomResponseDTO roomResponseDTO = new RoomResponseDTO();
+        roomResponseDTO.setRoomId(roomEntity.getRoomId());
+        roomResponseDTO.setRoomName(roomEntity.getRoomName());
+        roomResponseDTO.setTitle(roomEntity.getTitle());
+        roomResponseDTO.setDescription(roomEntity.getDescription());
+        roomResponseDTO.setAddress(roomEntity.getAddress());
+        roomResponseDTO.setPrice_per_night(roomEntity.getPrice_per_night());
+        roomResponseDTO.setMax_guests(roomEntity.getMax_guests());
+        roomResponseDTO.setStatus(roomEntity.getStatus());
+        roomResponseDTO.setCategoryName(roomEntity.getCategory().getCategoryName());
+        roomResponseDTO.setOwnerName(roomEntity.getOwner().getFirstName() + " " + roomEntity.getOwner().getLastName());
+        return roomResponseDTO;
+    }
+
+    @Override
+    public List<RoomResponseDTO> getRoomByPricePerNight(BigDecimal minPrice, BigDecimal maxPrice) {
+        List<RoomEntity> roomEntityList = roomRepository.findAll();
+        List<RoomResponseDTO> roomResponseDTOList = new ArrayList<>();
+        for (RoomEntity room : roomEntityList) {
+            if (room.getPrice_per_night().compareTo(minPrice) >= 0 && room.getPrice_per_night().compareTo(maxPrice) <= 0) {
+                RoomResponseDTO roomResponseDTO = new RoomResponseDTO();
+                roomResponseDTO.setRoomId(room.getRoomId());
+                roomResponseDTO.setRoomName(room.getRoomName());
+                roomResponseDTO.setTitle(room.getTitle());
+                roomResponseDTO.setDescription(room.getDescription());
+                roomResponseDTO.setAddress(room.getAddress());
+                roomResponseDTO.setPrice_per_night(room.getPrice_per_night());
+                roomResponseDTO.setMax_guests(room.getMax_guests());
+                roomResponseDTO.setStatus(room.getStatus());
+                roomResponseDTO.setCategoryName(room.getCategory().getCategoryName());
+                roomResponseDTO.setOwnerName(room.getOwner().getFirstName() + " " + room.getOwner().getLastName());
+                roomResponseDTOList.add(roomResponseDTO);
+            }
+        }
+        return roomResponseDTOList;
+    }
+
+    @Override
+    public List<RoomResponseDTO> getRoomByMaxGuests(int maxGuests) {
+        List<RoomEntity> roomEntityList = roomRepository.findAll();
+        List<RoomResponseDTO> roomResponseDTOList = new ArrayList<>();
+        for (RoomEntity room : roomEntityList) {
+            if (room.getMax_guests() == maxGuests) {
+                RoomResponseDTO roomResponseDTO = new RoomResponseDTO();
+                roomResponseDTO.setRoomId(room.getRoomId());
+                roomResponseDTO.setRoomName(room.getRoomName());
+                roomResponseDTO.setTitle(room.getTitle());
+                roomResponseDTO.setDescription(room.getDescription());
+                roomResponseDTO.setAddress(room.getAddress());
+                roomResponseDTO.setPrice_per_night(room.getPrice_per_night());
+                roomResponseDTO.setMax_guests(room.getMax_guests());
+                roomResponseDTO.setStatus(room.getStatus());
+                roomResponseDTO.setCategoryName(room.getCategory().getCategoryName());
+                roomResponseDTO.setOwnerName(room.getOwner().getFirstName() + " " + room.getOwner().getLastName());
+                roomResponseDTOList.add(roomResponseDTO);
+            }
+        }
+        return roomResponseDTOList;
+    }
+
+    @Override
+    public List<RoomResponseDTO> getRoomByAddress(String address) {
+        List<RoomEntity> roomEntityList = roomRepository.findAll();
+        List<RoomResponseDTO> roomResponseDTOList = new ArrayList<>();
+        for (RoomEntity room : roomEntityList) {
+            if (room.getAddress().equals(address)) {
+                RoomResponseDTO roomResponseDTO = new RoomResponseDTO();
+                roomResponseDTO.setRoomId(room.getRoomId());
+                roomResponseDTO.setRoomName(room.getRoomName());
+                roomResponseDTO.setTitle(room.getTitle());
+                roomResponseDTO.setDescription(room.getDescription());
+                roomResponseDTO.setAddress(room.getAddress());
+                roomResponseDTO.setPrice_per_night(room.getPrice_per_night());
+                roomResponseDTO.setMax_guests(room.getMax_guests());
+                roomResponseDTO.setStatus(room.getStatus());
+                roomResponseDTO.setCategoryName(room.getCategory().getCategoryName());
+                roomResponseDTO.setOwnerName(room.getOwner().getFirstName() + " " + room.getOwner().getLastName());
+                roomResponseDTOList.add(roomResponseDTO);
+            }
+        }
+        return roomResponseDTOList;
+    }
+
+    @Override
+    public List<RoomResponseDTO> getRoomByCategory(String categoryId) {
+        List<RoomEntity> roomEntityList = roomRepository.findAll();
+        List<RoomResponseDTO> roomResponseDTOList = new ArrayList<>();
+        for (RoomEntity room : roomEntityList) {
+            if (room.getCategory().getCategoryId().equals(categoryId)) {
+                RoomResponseDTO roomResponseDTO = new RoomResponseDTO();
+                roomResponseDTO.setRoomId(room.getRoomId());
+                roomResponseDTO.setRoomName(room.getRoomName());
+                roomResponseDTO.setTitle(room.getTitle());
+                roomResponseDTO.setDescription(room.getDescription());
+                roomResponseDTO.setAddress(room.getAddress());
+                roomResponseDTO.setPrice_per_night(room.getPrice_per_night());
+                roomResponseDTO.setMax_guests(room.getMax_guests());
+                roomResponseDTO.setStatus(room.getStatus());
+                roomResponseDTO.setCategoryName(room.getCategory().getCategoryName());
+                roomResponseDTO.setOwnerName(room.getOwner().getFirstName() + " " + room.getOwner().getLastName());
+                roomResponseDTOList.add(roomResponseDTO);
+            }
+        }
+        return roomResponseDTOList;
     }
 }
