@@ -17,8 +17,10 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class BookingResponseDTO {
     private String bookingId;
-    private LocalDateTime checkInTime;
-    private LocalDateTime checkOutTime;
+    private LocalDateTime planCheckInTime;
+    private LocalDateTime planCheckOutTime;
+    private LocalDateTime actualCheckInTime;
+    private LocalDateTime actualCheckOutTime;
     private String status; // Chỗ này thì status là PENDING, CONFIRM, CANCELLED, COMPLETED
     private BigDecimal totalPrice;
     private String userId;

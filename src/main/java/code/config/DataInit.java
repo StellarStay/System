@@ -406,40 +406,52 @@ public class DataInit implements CommandLineRunner {
         paymentMethodRepository.save(bankTransferMethod);
 
         // 7. Tạo Bookings
+        // Booking 1: Đã confirm, chưa check-in (trong tương lai)
         BookingEntity booking1 = new BookingEntity();
         booking1.setBookingId(RandomId.generateRoomId(10));
-        booking1.setCheckInTime(LocalDateTime.now().plusDays(5));
-        booking1.setCheckOutTime(LocalDateTime.now().plusDays(8));
+        booking1.setPlanCheckInTime(LocalDateTime.now().plusDays(5));
+        booking1.setPlanCheckOutTime(LocalDateTime.now().plusDays(8));
+        booking1.setActualCheckInTime(null); // Chưa check-in
+        booking1.setActualCheckOutTime(null); // Chưa check-out
         booking1.setStatus("CONFIRM");
         booking1.setTotalPrice(new BigDecimal("4500000"));
         booking1.setUser(user1);
         booking1.setRoom(room1);
         bookingRepository.save(booking1);
 
+        // Booking 2: Đã confirm, chưa check-in (trong tương lai)
         BookingEntity booking2 = new BookingEntity();
         booking2.setBookingId(RandomId.generateRoomId(10));
-        booking2.setCheckInTime(LocalDateTime.now().plusDays(10));
-        booking2.setCheckOutTime(LocalDateTime.now().plusDays(15));
+        booking2.setPlanCheckInTime(LocalDateTime.now().plusDays(10));
+        booking2.setPlanCheckOutTime(LocalDateTime.now().plusDays(15));
+        booking2.setActualCheckInTime(null); // Chưa check-in
+        booking2.setActualCheckOutTime(null); // Chưa check-out
         booking2.setStatus("CONFIRM");
         booking2.setTotalPrice(new BigDecimal("10000000"));
         booking2.setUser(user2);
         booking2.setRoom(room2);
         bookingRepository.save(booking2);
 
+        // Booking 3: Pending, chưa thanh toán
         BookingEntity booking3 = new BookingEntity();
         booking3.setBookingId(RandomId.generateRoomId(10));
-        booking3.setCheckInTime(LocalDateTime.now().plusDays(3));
-        booking3.setCheckOutTime(LocalDateTime.now().plusDays(5));
+        booking3.setPlanCheckInTime(LocalDateTime.now().plusDays(3));
+        booking3.setPlanCheckOutTime(LocalDateTime.now().plusDays(5));
+        booking3.setActualCheckInTime(null);
+        booking3.setActualCheckOutTime(null);
         booking3.setStatus("PENDING");
         booking3.setTotalPrice(new BigDecimal("10000000"));
         booking3.setUser(user1);
         booking3.setRoom(room3);
         bookingRepository.save(booking3);
 
+        // Booking 4: Đã hủy (trong quá khứ)
         BookingEntity booking4 = new BookingEntity();
         booking4.setBookingId(RandomId.generateRoomId(10));
-        booking4.setCheckInTime(LocalDateTime.now().minusDays(10));
-        booking4.setCheckOutTime(LocalDateTime.now().minusDays(8));
+        booking4.setPlanCheckInTime(LocalDateTime.now().minusDays(10));
+        booking4.setPlanCheckOutTime(LocalDateTime.now().minusDays(8));
+        booking4.setActualCheckInTime(null); // Đã hủy nên không có actual
+        booking4.setActualCheckOutTime(null);
         booking4.setStatus("CANCELLED");
         booking4.setTotalPrice(new BigDecimal("1600000"));
         booking4.setUser(user2);

@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class BaseRequestBooking {
-    private LocalDateTime checkInTime;
-    private LocalDateTime checkOutTime;
+    private LocalDateTime planCheckInTime;
+    private LocalDateTime planCheckOutTime;
     private String roomId;
 }

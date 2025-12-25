@@ -47,20 +47,19 @@ public class BookingServiceImpl implements BookingService {
             return "Room is not exist";
         }
         boolean checkAvailable = checkRoomAvailability(guestBookingRequestDTO.getRoomId(),
-                guestBookingRequestDTO.getCheckInTime(), guestBookingRequestDTO.getCheckOutTime());
+                guestBookingRequestDTO.getPlanCheckInTime(), guestBookingRequestDTO.getPlanCheckOutTime());
         if (!checkAvailable) {
             return "Room is not available in selected time";
         }
-        int nightForBook = Math.toIntExact(ChronoUnit.DAYS.between(guestBookingRequestDTO.getCheckInTime(), guestBookingRequestDTO.getCheckOutTime()));
+        int nightForBook = Math.toIntExact(ChronoUnit.DAYS.between(guestBookingRequestDTO.getPlanCheckInTime(), guestBookingRequestDTO.getPlanCheckOutTime()));
         BigDecimal priceForBook = (BigDecimal.valueOf(nightForBook).multiply(roomEntity.getPrice_per_night()));
         TempBookingBeforePaymentDTO tempBooking = new TempBookingBeforePaymentDTO();
         tempBooking.setTempBookingId(generateBookingId());
         tempBooking.setRoomId(guestBookingRequestDTO.getRoomId());
         tempBooking.setUserId(null); // Guest không có userId
-        tempBooking.setCheckInTime(null);
-        tempBooking.setCheckOutTime(null);
+        tempBooking.setPlanCheckInTime(guestBookingRequestDTO.getPlanCheckInTime());
+        tempBooking.setPlanCheckOutTime(guestBookingRequestDTO.getPlanCheckOutTime());
         tempBooking.setTotalPrice(priceForBook);
-
         tempBookingService.save(tempBooking);
         return "Success: " + tempBooking.getTempBookingId();
     }
@@ -76,18 +75,18 @@ public class BookingServiceImpl implements BookingService {
             return "User is not exist";
         }
         boolean checkAvailable = checkRoomAvailability(bookingRequestDTO.getRoomId(),
-                bookingRequestDTO.getCheckInTime(), bookingRequestDTO.getCheckOutTime());
+                bookingRequestDTO.getPlanCheckInTime(), bookingRequestDTO.getPlanCheckOutTime());
         if (!checkAvailable) {
             return "Room is not available in selected time";
         }
-        int nightForBook = Math.toIntExact(ChronoUnit.DAYS.between(bookingRequestDTO.getCheckInTime(), bookingRequestDTO.getCheckOutTime()));
+        int nightForBook = Math.toIntExact(ChronoUnit.DAYS.between(bookingRequestDTO.getPlanCheckInTime(), bookingRequestDTO.getPlanCheckOutTime()));
         BigDecimal priceForBook = (BigDecimal.valueOf(nightForBook).multiply(roomEntity.getPrice_per_night()));
         TempBookingBeforePaymentDTO tempBooking = new TempBookingBeforePaymentDTO();
         tempBooking.setTempBookingId(generateBookingId());
         tempBooking.setRoomId(bookingRequestDTO.getRoomId());
         tempBooking.setUserId(userId);
-        tempBooking.setCheckInTime(null);
-        tempBooking.setCheckOutTime(null);
+        tempBooking.setPlanCheckInTime(bookingRequestDTO.getPlanCheckInTime());
+        tempBooking.setPlanCheckOutTime(bookingRequestDTO.getPlanCheckOutTime());
         tempBooking.setTotalPrice(priceForBook);
 
         tempBookingService.save(tempBooking);
@@ -113,8 +112,8 @@ public class BookingServiceImpl implements BookingService {
         bookingEntity.setBookingId(tempBooking.getTempBookingId());
         bookingEntity.setRoom(roomEntity);
         bookingEntity.setUser(userFromTemp); // userFromTemp có thể là null nếu như user không tồn tại
-        bookingEntity.setCheckInTime(null);
-        bookingEntity.setCheckOutTime(null);
+        bookingEntity.setPlanCheckInTime(tempBooking.getPlanCheckInTime());
+        bookingEntity.setPlanCheckOutTime(tempBooking.getPlanCheckOutTime());
         bookingEntity.setStatus("PENDING");
         bookingEntity.setTotalPrice(tempBooking.getTotalPrice());
 
@@ -124,7 +123,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public boolean updateCheckIn(String bookingId, UserBookingRequestDTO userBookingRequestDTO) {
+    public boolean updateCheckInTime(String bookingId, UserBookingRequestDTO userBookingRequestDTO) {
         // Phần update này chỉ dành cho Host/Admin và nó chỉ được update khi nào mà khách hàng đến nơi và check in
 
         BookingEntity bookingEntity = bookingRepository.findById(bookingId).orElse(null);
@@ -132,13 +131,13 @@ public class BookingServiceImpl implements BookingService {
             return false;
         }
         bookingEntity.setStatus("CONFIRMED");
-        bookingEntity.setCheckInTime(LocalDateTime.now());
+        bookingEntity.setActualCheckInTime(LocalDateTime.now());
         bookingRepository.save(bookingEntity);
         return true;
     }
 
     @Override
-    public boolean updateCheckOut(String bookingId, UserBookingRequestDTO userBookingRequestDTO) {
+    public boolean updateCheckOutTime(String bookingId, UserBookingRequestDTO userBookingRequestDTO) {
         // Phần update này chỉ dành cho Host/Admin và nó chỉ được update khi nào mà khách hàng đến nơi và check out
 
         BookingEntity bookingEntity = bookingRepository.findById(bookingId).orElse(null);
@@ -146,7 +145,7 @@ public class BookingServiceImpl implements BookingService {
             return false;
         }
         bookingEntity.setStatus("COMPLETED");
-        bookingEntity.setCheckOutTime(LocalDateTime.now());
+        bookingEntity.setActualCheckOutTime(LocalDateTime.now());
         bookingRepository.save(bookingEntity);
         return true;
     }
@@ -169,8 +168,12 @@ public class BookingServiceImpl implements BookingService {
         for(BookingEntity bookingEntity : bookingEntityList) {
             BookingResponseDTO bookingResponseDTO = new BookingResponseDTO();
             bookingResponseDTO.setBookingId(bookingEntity.getBookingId());
-            bookingResponseDTO.setCheckInTime(bookingEntity.getCheckInTime());
-            bookingResponseDTO.setCheckOutTime(bookingEntity.getCheckOutTime());
+
+            bookingResponseDTO.setPlanCheckInTime(bookingEntity.getPlanCheckInTime());
+            bookingResponseDTO.setPlanCheckOutTime(bookingEntity.getPlanCheckOutTime());
+            bookingResponseDTO.setActualCheckInTime(bookingEntity.getActualCheckInTime());
+            bookingResponseDTO.setActualCheckOutTime(bookingEntity.getActualCheckOutTime());
+
             bookingResponseDTO.setStatus(bookingEntity.getStatus());
             bookingResponseDTO.setTotalPrice(bookingEntity.getTotalPrice());
             bookingResponseDTO.setUserId(bookingEntity.getUser().getUserId());
@@ -193,8 +196,10 @@ public class BookingServiceImpl implements BookingService {
         } else {
             BookingResponseDTO bookingResponseDTO = new BookingResponseDTO();
             bookingResponseDTO.setBookingId(bookingEntity.getBookingId());
-            bookingResponseDTO.setCheckInTime(bookingEntity.getCheckInTime());
-            bookingResponseDTO.setCheckOutTime(bookingEntity.getCheckOutTime());
+            bookingResponseDTO.setPlanCheckInTime(bookingEntity.getPlanCheckInTime());
+            bookingResponseDTO.setPlanCheckOutTime(bookingEntity.getPlanCheckOutTime());
+            bookingResponseDTO.setActualCheckInTime(bookingEntity.getActualCheckInTime());
+            bookingResponseDTO.setActualCheckOutTime(bookingEntity.getActualCheckOutTime());
             bookingResponseDTO.setStatus(bookingEntity.getStatus());
             bookingResponseDTO.setTotalPrice(bookingEntity.getTotalPrice());
             bookingResponseDTO.setUserId(bookingEntity.getUser().getUserId());
@@ -205,7 +210,7 @@ public class BookingServiceImpl implements BookingService {
 
 
     @Override
-    public boolean checkRoomAvailability(String roomId, LocalDateTime checkInTime, LocalDateTime checkOutTime) {
+    public boolean checkRoomAvailability(String roomId, LocalDateTime planCheckInTime, LocalDateTime planCheckOutTime) {
         // Muốn check thì đầu tiên phải lấy phòng ở trong toàn bộ booking ra
         // Sau đó dựa vào tất cả trong booking đối với phòng đó để kiểm tra xem có bị trùng thời gian không ?
         // Nếu trùng thời gian nhưng trạng thái là CANCELLED thì vẫn được duyệt qua và cho đặt
@@ -217,9 +222,9 @@ public class BookingServiceImpl implements BookingService {
         }
         List<BookingEntity> bookingsOfRoom = bookingRepository.findByRoom_RoomId(roomId);
         for (BookingEntity booking : bookingsOfRoom) {
-            boolean checkOverLapping =  (checkInTime.isAfter(booking.getCheckInTime()) && checkInTime.isBefore(booking.getCheckOutTime()))  ||
-                    (checkOutTime.isAfter(booking.getCheckInTime()) && checkOutTime.isBefore(booking.getCheckOutTime())) ||
-                    (checkInTime.isBefore(booking.getCheckInTime()) && checkOutTime.isAfter(booking.getCheckOutTime()));
+            boolean checkOverLapping =  (planCheckInTime.isAfter(booking.getPlanCheckInTime()) && planCheckInTime.isBefore(booking.getPlanCheckOutTime()))  ||
+                    (planCheckOutTime.isAfter(booking.getPlanCheckInTime()) && planCheckOutTime.isBefore(booking.getPlanCheckOutTime())) ||
+                    (planCheckInTime.isBefore(booking.getPlanCheckInTime()) && planCheckOutTime.isAfter(booking.getPlanCheckOutTime()));
 
             if(booking.getStatus().equals("CANCELLED") || booking.getStatus().equals("COMPLETED")) {
                 continue;

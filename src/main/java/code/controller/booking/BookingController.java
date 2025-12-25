@@ -27,4 +27,5 @@ public class BookingController {
     public ResponseEntity<String> createGuestBooking(@RequestBody GuestBookingRequestDTO guestBookingRequestDTO) {
         return ResponseEntity.ok().body("success");
     }
+
 }

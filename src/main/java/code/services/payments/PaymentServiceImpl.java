@@ -1,13 +1,16 @@
 package code.services.payments;
 
+import code.model.dto.booking.TempBookingBeforePaymentDTO;
 import code.model.dto.payments.PaymentRequestDTO;
 import code.model.dto.payments.PaymentResponseDTO;
 import code.model.entity.booking.BookingEntity;
+import code.model.entity.booking_contact.BookingContactEntity;
 import code.model.entity.payments.PaymentEntity;
 import code.model.entity.payments.PaymentMethodEntity;
 import code.repository.payments.PaymentRepository;
 import code.services.booking.BookingService;
 import code.services.booking.TempBookingService;
+import code.services.booking_contact.BookingContactService;
 import code.util.RandomId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,6 +30,8 @@ public class PaymentServiceImpl implements  PaymentService {
     private BookingService bookingService;
     @Autowired
     private TempBookingService tempBookingService;
+    @Autowired
+    private BookingContactService bookingContactService;
 
     int max_length_payment_id = 8;
     private String generatePaymentId() {
@@ -43,7 +48,15 @@ public class PaymentServiceImpl implements  PaymentService {
         if (paymentMethod == null) {
             return false;
         }
+
         BookingEntity bookingEntity = bookingService.insertBookingFromTemp(paymentRequestDTO.getTempBookingId());
+        if (bookingEntity == null) {
+            return  false;
+        }
+        BookingContactEntity bookingContactEntity = bookingContactService.insertBookingContact(bookingEntity, paymentRequestDTO.getBookingContactRequest());
+        if (bookingContactEntity == null) {
+            return false;
+        }
 
         PaymentEntity paymentEntity = new PaymentEntity();
         paymentEntity.setPaymentId(generatePaymentId());
