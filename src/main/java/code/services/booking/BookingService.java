@@ -15,8 +15,8 @@ public interface BookingService {
     BookingEntity insertBookingFromTemp(String tempBookingId);
 
 
-    boolean updateCheckInTime(String bookingId, UserBookingRequestDTO bookingRequestDTO);
-    boolean updateCheckOutTime(String bookingId, UserBookingRequestDTO bookingRequestDTO);
+    boolean updateActualCheckInTime(String bookingId, UserBookingRequestDTO bookingRequestDTO);
+    boolean updateActualCheckOutTime(String bookingId, UserBookingRequestDTO bookingRequestDTO);
 
     boolean cancelBooking(String bookingId);
 

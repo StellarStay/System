@@ -10,8 +10,10 @@ import code.util.RandomId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 @Service
-public class BookingContacServiceImpl implements BookingContactService {
+public class BookingContactServiceImpl implements BookingContactService {
 
     @Autowired
     private TempBookingService tempBookingService;
@@ -48,6 +50,8 @@ public class BookingContacServiceImpl implements BookingContactService {
             bookingContactEntity.setEmail(bookingContactRequestDTO.getEmail());
             bookingContactEntity.setPhoneNumber(bookingContactRequestDTO.getPhoneNumber());
         }
+        bookingContactEntity.setCreatedAt(LocalDateTime.now());
+        bookingContactRepository.save(bookingContactEntity);
 
         return bookingContactEntity;
 

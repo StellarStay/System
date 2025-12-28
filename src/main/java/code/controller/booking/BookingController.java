@@ -20,12 +20,18 @@ public class BookingController {
     private PaymentService paymentService;
 
     @PostMapping("/filling_booking_information_for_user")
-    public ResponseEntity<String> createUserBooking(@RequestBody UserBookingRequestDTO userBookingRequestDTO) {
-        return ResponseEntity.ok().body("success");
+    public ResponseEntity<String> createUserBooking(@RequestBody UserBookingRequestDTO userBookingRequestDTO, String userId) {
+        if (userBookingRequestDTO == null || userId == null || userId.isEmpty()) {
+            return ResponseEntity.badRequest().body("Invalid request data");
+        }
+        return ResponseEntity.ok(bookingService.prepareUserBooking(userBookingRequestDTO, userId));
     }
     @PostMapping("/filling_booking_information_for_guest")
     public ResponseEntity<String> createGuestBooking(@RequestBody GuestBookingRequestDTO guestBookingRequestDTO) {
-        return ResponseEntity.ok().body("success");
+        if (guestBookingRequestDTO == null) {
+            return ResponseEntity.badRequest().body("Invalid request data");
+        }
+        return ResponseEntity.ok(bookingService.prepareGuestBooking(guestBookingRequestDTO));
     }
 
 }

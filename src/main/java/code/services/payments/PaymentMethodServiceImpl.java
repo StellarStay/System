@@ -1,8 +1,10 @@
 package code.services.payments;
 
+import code.model.dto.booking.TempBookingBeforePaymentDTO;
 import code.model.dto.payments.PaymentMethodRequestDTO;
 import code.model.entity.payments.PaymentMethodEntity;
 import code.repository.payments.PaymentMethodRepository;
+import code.services.booking.TempBookingService;
 import code.util.RandomId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,6 +15,10 @@ import java.util.List;
 public class PaymentMethodServiceImpl implements  PaymentMethodService {
     @Autowired
     private PaymentMethodRepository paymentMethodRepository;
+    @Autowired
+    private TempBookingService tempBookingService;
+
+
     int max_length_payment_method_id = 8;
     private String generatePaymentMethodId() {
         String paymentMethodId;
@@ -33,10 +39,21 @@ public class PaymentMethodServiceImpl implements  PaymentMethodService {
         return true;
     }
 
-//    @Override
-//    public boolean updatePaymentMethod(String paymentId, String paymentMethodId) {
-//        return false;
-//    }
+    @Override
+    public boolean updatePaymentMethodId(String tempBookingId, String paymentMethodId) {
+        TempBookingBeforePaymentDTO tempBookingBeforePaymentDTO = tempBookingService.get(tempBookingId);
+        if (tempBookingBeforePaymentDTO == null) {
+            throw new RuntimeException("Temp Booking not found");
+        }
+
+        PaymentMethodEntity paymentMethod = paymentMethodRepository.findById(paymentMethodId).orElse(null);
+        if (paymentMethod == null) {
+            throw new RuntimeException("Payment method not found");
+        }
+        tempBookingBeforePaymentDTO.setPaymentMethodId(paymentMethod.getPaymentMethodId());
+        tempBookingService.save(tempBookingBeforePaymentDTO);
+        return true;
+    }
 
     @Override
     public boolean deletePaymentMethod(String paymentMethodId) {

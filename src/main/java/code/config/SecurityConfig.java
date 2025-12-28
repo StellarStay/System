@@ -35,6 +35,8 @@ public class SecurityConfig {
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         // Auth endpoints - Public
                         .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/refresh", "/api/auth/register", "/api/auth/verify-otp").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/payment/**", "/api/payment_method/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/booking/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/rooms/get/**").permitAll()
 
                         // Endpoints cần authentication

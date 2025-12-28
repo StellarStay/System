@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
 public class TempBookingServiceImpl implements TempBookingService {
 
     private static final String KEY_PREFIX = "TEMP_BOOKING: ";
-    private static final long TTL = 2;
+    private static final long TTL = 10;
 
     @Autowired
     private RedisTemplate<Object, Object> redisTemplate;
