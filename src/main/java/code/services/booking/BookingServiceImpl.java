@@ -4,6 +4,7 @@ import code.model.dto.booking.GuestBookingRequestDTO;
 import code.model.dto.booking.TempBookingBeforePaymentDTO;
 import code.model.dto.booking.UserBookingRequestDTO;
 import code.model.dto.booking.BookingResponseDTO;
+import code.model.dto.rooms.RoomResponseDTO;
 import code.model.entity.booking.BookingEntity;
 import code.model.entity.rooms.RoomEntity;
 import code.model.entity.users.UserEntity;
@@ -230,6 +231,11 @@ public class BookingServiceImpl implements BookingService {
             bookingResponseDTO.setRoomId(bookingEntity.getRoom().getRoomId());
             return bookingResponseDTO;
         }
+    }
+
+    @Override
+    public List<RoomResponseDTO> getRoomByDateAvailability(String planCheckInDate, String planCheckOutDate) {
+
     }
 
 

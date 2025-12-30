@@ -20,4 +20,5 @@ public interface RoomsService {
     List<RoomResponseDTO> getRoomByAddress(String address);
     List<RoomResponseDTO> getRoomByCategory(String categoryId);
 
+
 }
