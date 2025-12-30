@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface PaymentMethodService {
     boolean addPaymentMethod(PaymentMethodRequestDTO paymentMethodRequestDTO);
-//    boolean updatePaymentMethod(String paymentId, String paymentMethodId);
+    boolean updatePaymentMethodId(String tempBookingId, String paymentMethodId);
     boolean deletePaymentMethod(String paymentMethodId);
     PaymentMethodEntity getPaymentMethodByPaymentMethodId(String paymentMethodId);
     List<PaymentMethodEntity> getAllPaymentMethods();

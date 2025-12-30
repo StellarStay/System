@@ -4,6 +4,7 @@ import code.model.dto.booking.GuestBookingRequestDTO;
 import code.model.dto.booking.TempBookingBeforePaymentDTO;
 import code.model.dto.booking.UserBookingRequestDTO;
 import code.model.dto.booking.BookingResponseDTO;
+import code.model.dto.rooms.RoomResponseDTO;
 import code.model.entity.booking.BookingEntity;
 import code.model.entity.rooms.RoomEntity;
 import code.model.entity.users.UserEntity;
@@ -60,6 +61,8 @@ public class BookingServiceImpl implements BookingService {
         tempBooking.setPlanCheckInTime(guestBookingRequestDTO.getPlanCheckInTime());
         tempBooking.setPlanCheckOutTime(guestBookingRequestDTO.getPlanCheckOutTime());
         tempBooking.setTotalPrice(priceForBook);
+        tempBooking.setBookingContactRequestDTO(guestBookingRequestDTO.getBookingContactRequestDTO());
+        tempBooking.setPaymentMethodId(null);
         tempBookingService.save(tempBooking);
         return "Success: " + tempBooking.getTempBookingId();
     }
@@ -88,7 +91,7 @@ public class BookingServiceImpl implements BookingService {
         tempBooking.setPlanCheckInTime(bookingRequestDTO.getPlanCheckInTime());
         tempBooking.setPlanCheckOutTime(bookingRequestDTO.getPlanCheckOutTime());
         tempBooking.setTotalPrice(priceForBook);
-
+        tempBooking.setPaymentMethodId(null);
         tempBookingService.save(tempBooking);
         return "Success: " + tempBooking.getTempBookingId();
     }
@@ -96,34 +99,56 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingEntity insertBookingFromTemp(String tempBookingId) {
+        System.out.println("  📝 insertBookingFromTemp called with tempBookingId: " + tempBookingId);
+
         TempBookingBeforePaymentDTO tempBooking = tempBookingService.get(tempBookingId);
         if (tempBooking == null) {
+            System.out.println("  ❌ ERROR: TempBooking not found in insertBookingFromTemp");
             throw new RuntimeException("TempBooking not found");
         }
+        System.out.println("  ✅ TempBooking retrieved successfully");
 
+        System.out.println("  📝 Fetching room: " + tempBooking.getRoomId());
         RoomEntity roomEntity = roomsService.getRoomById(tempBooking.getRoomId());
         if (roomEntity == null) {
+            System.out.println("  ❌ ERROR: Room not found: " + tempBooking.getRoomId());
             throw new RuntimeException("Room is not exist");
         }
+        System.out.println("  ✅ Room found: " + roomEntity.getRoomId());
 
-        UserEntity userFromTemp = userService.getUser(tempBooking.getUserId());
+        // Xử lý user: nếu userId null (guest) thì user sẽ là null
+        UserEntity userFromTemp = null;
+        if (tempBooking.getUserId() != null && !tempBooking.getUserId().isEmpty()) {
+            System.out.println("  📝 Fetching user: " + tempBooking.getUserId());
+            userFromTemp = userService.getUser(tempBooking.getUserId());
+            if (userFromTemp != null) {
+                System.out.println("  ✅ User found: " + userFromTemp.getUserId());
+            } else {
+                System.out.println("  ⚠️ User not found, but continuing as guest");
+            }
+        } else {
+            System.out.println("  📝 Guest booking (no userId)");
+        }
 
+        System.out.println("  📝 Creating BookingEntity...");
         BookingEntity bookingEntity = new BookingEntity();
         bookingEntity.setBookingId(tempBooking.getTempBookingId());
         bookingEntity.setRoom(roomEntity);
-        bookingEntity.setUser(userFromTemp); // userFromTemp có thể là null nếu như user không tồn tại
+        bookingEntity.setUser(userFromTemp); // userFromTemp có thể là null nếu là guest booking
         bookingEntity.setPlanCheckInTime(tempBooking.getPlanCheckInTime());
         bookingEntity.setPlanCheckOutTime(tempBooking.getPlanCheckOutTime());
         bookingEntity.setStatus("PENDING");
         bookingEntity.setTotalPrice(tempBooking.getTotalPrice());
 
+        System.out.println("  📝 Saving BookingEntity to database...");
         bookingRepository.save(bookingEntity);
+        System.out.println("  ✅ BookingEntity saved successfully");
 
         return bookingEntity;
     }
 
     @Override
-    public boolean updateCheckInTime(String bookingId, UserBookingRequestDTO userBookingRequestDTO) {
+    public boolean updateActualCheckInTime(String bookingId, UserBookingRequestDTO userBookingRequestDTO) {
         // Phần update này chỉ dành cho Host/Admin và nó chỉ được update khi nào mà khách hàng đến nơi và check in
 
         BookingEntity bookingEntity = bookingRepository.findById(bookingId).orElse(null);
@@ -137,7 +162,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public boolean updateCheckOutTime(String bookingId, UserBookingRequestDTO userBookingRequestDTO) {
+    public boolean updateActualCheckOutTime(String bookingId, UserBookingRequestDTO userBookingRequestDTO) {
         // Phần update này chỉ dành cho Host/Admin và nó chỉ được update khi nào mà khách hàng đến nơi và check out
 
         BookingEntity bookingEntity = bookingRepository.findById(bookingId).orElse(null);
@@ -206,6 +231,11 @@ public class BookingServiceImpl implements BookingService {
             bookingResponseDTO.setRoomId(bookingEntity.getRoom().getRoomId());
             return bookingResponseDTO;
         }
+    }
+
+    @Override
+    public List<RoomResponseDTO> getRoomByDateAvailability(String planCheckInDate, String planCheckOutDate) {
+
     }
 
 

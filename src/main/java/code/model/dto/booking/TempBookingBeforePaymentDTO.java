@@ -1,5 +1,6 @@
 package code.model.dto.booking;
 
+import code.model.dto.booking_contact.BookingContactRequestDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,5 +18,7 @@ public class TempBookingBeforePaymentDTO {
     private LocalDateTime planCheckInTime;
     private LocalDateTime planCheckOutTime;
     private BigDecimal totalPrice;
+    private BookingContactRequestDTO bookingContactRequestDTO;
+    private String paymentMethodId;
 
 }

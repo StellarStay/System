@@ -1,11 +1,11 @@
 package code.model.dto.booking;
 
-import lombok.AllArgsConstructor;
+import code.model.dto.booking_contact.BookingContactRequestDTO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public abstract class GuestBookingRequestDTO extends BaseRequestBooking {
+public class GuestBookingRequestDTO extends BaseRequestBooking {
+    private BookingContactRequestDTO bookingContactRequestDTO;
 }
