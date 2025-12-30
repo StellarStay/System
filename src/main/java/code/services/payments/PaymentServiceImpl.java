@@ -43,7 +43,7 @@ public class PaymentServiceImpl implements  PaymentService {
     }
 
     @Override
-    public boolean insertPayment(PaymentRequestDTO paymentRequestDTO) {
+    public boolean createPayment(PaymentRequestDTO paymentRequestDTO) {
         PaymentMethodEntity paymentMethod = paymentMethodService.getPaymentMethodByPaymentMethodId(paymentRequestDTO.getPaymentMethodId());
         if (paymentMethod == null) {
             return false;
