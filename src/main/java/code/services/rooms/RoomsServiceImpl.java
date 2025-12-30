@@ -216,4 +216,27 @@ public class RoomsServiceImpl implements RoomsService{
         }
         return roomResponseDTOList;
     }
+
+    @Override
+    public List<RoomResponseDTO> getRoomByDateAvailability(LocalDateTime planCheckInDate, LocalDateTime planCheckOutDate) {
+        List<RoomEntity> bookedRooms = roomRepository.findAvailableRooms(planCheckInDate, planCheckOutDate);
+        List<RoomResponseDTO> roomResponseDTOList = new ArrayList<>();
+        for (RoomEntity room : bookedRooms) {
+            RoomResponseDTO roomResponseDTO = new RoomResponseDTO();
+
+            roomResponseDTO.setRoomId(room.getRoomId());
+            roomResponseDTO.setRoomName(room.getRoomName());
+            roomResponseDTO.setTitle(room.getTitle());
+            roomResponseDTO.setDescription(room.getDescription());
+            roomResponseDTO.setAddress(room.getAddress());
+            roomResponseDTO.setPrice_per_night(room.getPrice_per_night());
+            roomResponseDTO.setMax_guests(room.getMax_guests());
+            roomResponseDTO.setStatus(room.getStatus());
+            roomResponseDTO.setCategoryName(room.getCategory().getCategoryName());
+            roomResponseDTO.setOwnerName(room.getOwner().getFirstName() + " " + room.getOwner().getLastName());
+
+            roomResponseDTOList.add(roomResponseDTO);
+        }
+        return  roomResponseDTOList;
+    }
 }

@@ -2,13 +2,15 @@ package code.controller.rooms;
 
 import code.model.dto.rooms.RoomRequestDTO;
 import code.model.dto.rooms.RoomResponseDTO;
-import code.model.entity.rooms.RoomEntity;
 import code.services.rooms.RoomsService;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -79,6 +81,16 @@ public class RoomController {
     public ResponseEntity<List<RoomResponseDTO>> getByPricePerNight(@RequestParam BigDecimal minPrice, @RequestParam BigDecimal maxPrice){
         List<RoomResponseDTO> rooms = roomsService.getRoomByPricePerNight(minPrice, maxPrice);
         return  ResponseEntity.ok(rooms);
+    }
+
+    @GetMapping("/get/getByDateAvailability" )
+    public ResponseEntity<List<RoomResponseDTO>> getByDateAvailability(
+            @Parameter(description = "Check-in date and time", schema = @Schema(type = "string", format = "date-time", example = "2025-12-30T14:00:00"))
+            @RequestParam LocalDateTime planCheckInDate,
+            @Parameter(description = "Check-out date and time", schema = @Schema(type = "string", format = "date-time", example = "2025-12-31T12:00:00"))
+            @RequestParam LocalDateTime planCheckOutDate) {
+        List<RoomResponseDTO> rooms = roomsService.getRoomByDateAvailability(planCheckInDate, planCheckOutDate);
+        return ResponseEntity.ok(rooms);
     }
 
 }

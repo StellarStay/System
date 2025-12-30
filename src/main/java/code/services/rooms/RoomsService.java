@@ -4,8 +4,11 @@ package code.services.rooms;
 import code.model.dto.rooms.RoomRequestDTO;
 import code.model.dto.rooms.RoomResponseDTO;
 import code.model.entity.rooms.RoomEntity;
+import org.springframework.cglib.core.Local;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface RoomsService {
@@ -19,6 +22,8 @@ public interface RoomsService {
     List<RoomResponseDTO> getRoomByMaxGuests(int maxGuests);
     List<RoomResponseDTO> getRoomByAddress(String address);
     List<RoomResponseDTO> getRoomByCategory(String categoryId);
+    List<RoomResponseDTO> getRoomByDateAvailability(LocalDateTime planCheckInDate, LocalDateTime planCheckOutDate);
+
 
 
 }

@@ -25,7 +25,6 @@ public interface BookingService {
     List<BookingResponseDTO> getAllBookings();
     BookingEntity getBookingById(String bookingId);
     BookingResponseDTO getBookingResponseById(String bookingId);
-    List<RoomResponseDTO> getRoomByDateAvailability(String planCheckInDate, String planCheckOutDate);
 
     boolean checkRoomAvailability(String roomId, LocalDateTime checkInTime, LocalDateTime checkOutTime);
 

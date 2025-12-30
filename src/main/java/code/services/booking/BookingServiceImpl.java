@@ -233,13 +233,11 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
-    @Override
-    public List<RoomResponseDTO> getRoomByDateAvailability(String planCheckInDate, String planCheckOutDate) {
 
-    }
 
 
     @Override
+    // Đây là hàm check xem phòng được chỉ định có trống vào khoảng thời gian muốn đặt hay không
     public boolean checkRoomAvailability(String roomId, LocalDateTime planCheckInTime, LocalDateTime planCheckOutTime) {
         // Muốn check thì đầu tiên phải lấy phòng ở trong toàn bộ booking ra
         // Sau đó dựa vào tất cả trong booking đối với phòng đó để kiểm tra xem có bị trùng thời gian không ?
@@ -252,9 +250,15 @@ public class BookingServiceImpl implements BookingService {
         }
         List<BookingEntity> bookingsOfRoom = bookingRepository.findByRoom_RoomId(roomId);
         for (BookingEntity booking : bookingsOfRoom) {
-            boolean checkOverLapping =  (planCheckInTime.isAfter(booking.getPlanCheckInTime()) && planCheckInTime.isBefore(booking.getPlanCheckOutTime()))  ||
+            boolean checkOverLapping =
+                    // Điều kiện check planCheckInTime bị lọt vào trong khoảng thời gian của booking
+                    (planCheckInTime.isAfter(booking.getPlanCheckInTime()) && planCheckInTime.isBefore(booking.getPlanCheckOutTime()))  ||
+                    // Điều kiện check planCheckOutTime bị lọt vào trong khoảng thời gian của booking
                     (planCheckOutTime.isAfter(booking.getPlanCheckInTime()) && planCheckOutTime.isBefore(booking.getPlanCheckOutTime())) ||
-                    (planCheckInTime.isBefore(booking.getPlanCheckInTime()) && planCheckOutTime.isAfter(booking.getPlanCheckOutTime()));
+                    // Điều kiện check planCheckInTime và planCheckOutTime bao trùm lấy khoảng thời gian của booking
+                    (planCheckInTime.isBefore(booking.getPlanCheckInTime()) && planCheckOutTime.isAfter(booking.getPlanCheckOutTime())) ||
+                    // Điều kiện check planCheckInTime hoặc planCheckOutTime trùng với thời gian của booking
+                    (planCheckInTime.isEqual(booking.getPlanCheckInTime()) || planCheckOutTime.isEqual(booking.getPlanCheckOutTime()));
 
             if(booking.getStatus().equals("CANCELLED") || booking.getStatus().equals("COMPLETED")) {
                 continue;
@@ -267,4 +271,3 @@ public class BookingServiceImpl implements BookingService {
         return true;
     }
 }
-
