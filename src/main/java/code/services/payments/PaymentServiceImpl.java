@@ -102,95 +102,54 @@ public class PaymentServiceImpl implements  PaymentService {
 
     @Override
     public boolean ipnHandler(MomoResponseDTO momoResponse) {
-        try {
-            // Lấy orderId chính là tempBookingId
-            String tempBookingId = momoResponse.getOrderId();
-            int resultCode = momoResponse.getResultCode();
+        // Lấy orderId chính là tempBookingId
+        String tempBookingId = momoResponse.getOrderId();
+        int resultCode = momoResponse.getResultCode();
 
-            System.out.println("\n=== IPN Handler Debug ===");
-            System.out.println("TempBookingId: " + tempBookingId);
-            System.out.println("ResultCode: " + resultCode);
-            System.out.println("Amount: " + momoResponse.getAmount());
-            System.out.println("Message: " + momoResponse.getMessage());
-
-            // Nếu thanh toán thất bại, return false
-            if (resultCode != 0) {
-                System.out.println("❌ Payment failed with resultCode: " + resultCode);
-                return false;
-            }
-
-            // Lấy thông tin booking tạm từ Redis
-            System.out.println("📝 Fetching TempBooking from Redis...");
-            TempBookingBeforePaymentDTO tempBookingBeforePaymentDTO = tempBookingService.get(tempBookingId);
-
-            if (tempBookingBeforePaymentDTO == null) {
-                System.out.println("❌ ERROR: Temp Booking not found for id: " + tempBookingId);
-                System.out.println("💡 Possible reasons:");
-                System.out.println("  1. TempBooking expired (TTL = 10 minutes)");
-                System.out.println("  2. TempBooking was already processed and deleted");
-                System.out.println("  3. Wrong tempBookingId");
-                throw new RuntimeException("Temp Booking not found for id: " + tempBookingId);
-            }
-
-            System.out.println("✅ TempBooking found!");
-            System.out.println("  - TempBookingId: " + tempBookingBeforePaymentDTO.getTempBookingId());
-            System.out.println("  - RoomId: " + tempBookingBeforePaymentDTO.getRoomId());
-            System.out.println("  - UserId: " + (tempBookingBeforePaymentDTO.getUserId() != null ? tempBookingBeforePaymentDTO.getUserId() : "null (guest)"));
-            System.out.println("  - TotalPrice: " + tempBookingBeforePaymentDTO.getTotalPrice());
-            System.out.println("  - PaymentMethodId: " + tempBookingBeforePaymentDTO.getPaymentMethodId());
-            System.out.println("  - BookingContact: " + tempBookingBeforePaymentDTO.getBookingContactRequestDTO());
-
-            // Lấy paymentMethodId từ TempBooking (đã được set trước đó)
-            String paymentMethodId = tempBookingBeforePaymentDTO.getPaymentMethodId();
-            if (paymentMethodId == null || paymentMethodId.isEmpty()) {
-                System.out.println("❌ ERROR: Payment method not selected");
-                throw new RuntimeException("Payment method not selected. Please call /api/payment_method/choose_method first");
-            }
-
-            // Tạo booking chính thức từ temp booking
-            System.out.println("📝 Creating booking from temp booking...");
-            BookingEntity bookingEntity = bookingService.insertBookingFromTemp(tempBookingBeforePaymentDTO.getTempBookingId());
-            System.out.println("✅ Booking created: " + bookingEntity.getBookingId());
-
-            // Tạo booking contact nếu có (cho guest)
-            if (tempBookingBeforePaymentDTO.getBookingContactRequestDTO() != null) {
-                System.out.println("📝 Creating booking contact for guest...");
-                bookingContactService.insertBookingContact(bookingEntity, tempBookingBeforePaymentDTO.getBookingContactRequestDTO());
-                System.out.println("✅ Booking contact created");
-            }
-
-            // Lấy payment method
-            System.out.println("📝 Fetching payment method: " + paymentMethodId);
-            PaymentMethodEntity paymentMethod = paymentMethodService.getPaymentMethodByPaymentMethodId(paymentMethodId);
-            if (paymentMethod == null) {
-                System.out.println("❌ ERROR: Payment method not found: " + paymentMethodId);
-                throw new RuntimeException("Payment method not found");
-            }
-            System.out.println("✅ Payment method found: " + paymentMethod.getPaymentMethodName());
-
-            // Tạo payment record
-            System.out.println("📝 Creating payment record...");
-            PaymentEntity paymentEntity = new PaymentEntity();
-            paymentEntity.setPaymentId(generatePaymentId());
-            paymentEntity.setBooking(bookingEntity);
-            paymentEntity.setPaymentMethod(paymentMethod);
-            paymentEntity.setPaymentStatus("SUCCESS");
-            paymentEntity.setPaidAt(LocalDateTime.now());
-            paymentEntity.setTotalPrice(tempBookingBeforePaymentDTO.getTotalPrice());
-            paymentRepository.save(paymentEntity);
-            System.out.println("✅ Payment record saved: " + paymentEntity.getPaymentId());
-
-            // Xóa temp booking khỏi Redis
-            System.out.println("📝 Deleting temp booking from Redis...");
-            tempBookingService.delete(tempBookingId);
-            System.out.println("✅ IPN Handler completed successfully!\n");
-            return true;
-
-        } catch (Exception e) {
-            System.out.println("❌ ERROR in IPN Handler: " + e.getMessage());
-            e.printStackTrace();
-            throw e;
+        // Nếu thanh toán thất bại, return false
+        if (resultCode != 0) {
+            return false;
         }
+
+        // Lấy thông tin booking tạm từ Redis
+        TempBookingBeforePaymentDTO tempBookingBeforePaymentDTO = tempBookingService.get(tempBookingId);
+        if (tempBookingBeforePaymentDTO == null) {
+            throw new RuntimeException("Temp Booking not found");
+        }
+
+        // Lấy paymentMethodId từ TempBooking (đã được set trước đó)
+        String paymentMethodId = tempBookingBeforePaymentDTO.getPaymentMethodId();
+        if (paymentMethodId == null || paymentMethodId.isEmpty()) {
+            throw new RuntimeException("Payment method not selected");
+        }
+
+        // Tạo booking chính thức từ temp booking
+        BookingEntity bookingEntity = bookingService.insertBookingFromTemp(tempBookingBeforePaymentDTO.getTempBookingId());
+
+        // Tạo booking contact nếu có (cho guest)
+        if (tempBookingBeforePaymentDTO.getBookingContactRequestDTO() != null) {
+            bookingContactService.insertBookingContact(bookingEntity, tempBookingBeforePaymentDTO.getBookingContactRequestDTO());
+        }
+
+        // Lấy payment method
+        PaymentMethodEntity paymentMethod = paymentMethodService.getPaymentMethodByPaymentMethodId(paymentMethodId);
+        if (paymentMethod == null) {
+            throw new RuntimeException("Payment method not found");
+        }
+
+        // Tạo payment record
+        PaymentEntity paymentEntity = new PaymentEntity();
+        paymentEntity.setPaymentId(generatePaymentId());
+        paymentEntity.setBooking(bookingEntity);
+        paymentEntity.setPaymentMethod(paymentMethod);
+        paymentEntity.setPaymentStatus("SUCCESS");
+        paymentEntity.setPaidAt(LocalDateTime.now());
+        paymentEntity.setTotalPrice(tempBookingBeforePaymentDTO.getTotalPrice());
+        paymentRepository.save(paymentEntity);
+
+        // Xóa temp booking khỏi Redis
+        tempBookingService.delete(tempBookingId);
+        return true;
     }
 
     private String generateSignature(MomoRequestDTO momoRequestDTO) {

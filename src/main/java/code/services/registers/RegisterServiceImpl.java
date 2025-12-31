@@ -74,7 +74,7 @@ public class RegisterServiceImpl implements RegisterService {
         tempUser.setIdCard(userRequestDTO.getIdCard());
         tempUser.setPhone(userRequestDTO.getPhone());
         tempUser.setDateOfBirth(userRequestDTO.getDateOfBirth());
-        tempUser.setRoleId("CvrdbGFd67");
+        tempUser.setRoleId(userRequestDTO.getRoleId());
         tempUser.setGender(userRequestDTO.isGender());
         tempUser.setEmail(userRequestDTO.getEmail());
         tempUser.setPassword(encodedPassword);

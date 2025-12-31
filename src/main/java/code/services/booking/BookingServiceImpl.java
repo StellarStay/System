@@ -233,9 +233,6 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
-
-
-
     @Override
     // Đây là hàm check xem phòng được chỉ định có trống vào khoảng thời gian muốn đặt hay không
     public boolean checkRoomAvailability(String roomId, LocalDateTime planCheckInTime, LocalDateTime planCheckOutTime) {

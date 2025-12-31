@@ -31,15 +31,23 @@ public class SecurityConfig {
                     return c;
                 }))
                 .authorizeHttpRequests(auth -> auth
-                        // Swagger
+                        // Swagger UI
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-                        // Auth endpoints - Public
-                        .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/refresh", "/api/auth/register", "/api/auth/verify-otp").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/payment/**", "/api/payment_method/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/booking/**").permitAll()
+
+                        // Auth endpoints - CHỈ login, register và refresh là public
+                        .requestMatchers("/api/auth/login", "/api/auth/refresh").permitAll()
+                        .requestMatchers("/api/auth/register/**").permitAll() // Register có nhiều steps
+
+                        // Payment webhook - CHỈ ipn-handler là public (MoMo callback)
+                        .requestMatchers("/api/payment/ipn-handler").permitAll()
+
+                        // Rooms - Public endpoints (xem phòng không cần đăng nhập)
                         .requestMatchers(HttpMethod.GET, "/api/rooms/get/**").permitAll()
 
-                        // Endpoints cần authentication
+                        // Payment methods - Có thể public để guest xem
+                        .requestMatchers(HttpMethod.GET, "/api/payment_method/**").permitAll()
+
+                        // TẤT CẢ endpoints còn lại đều CẦN authentication
                         .anyRequest().authenticated()
                 );
 
