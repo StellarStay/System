@@ -1,6 +1,7 @@
 package code.services.rooms;
 
 import code.model.dto.rooms.DeviceRequestDTO;
+import code.model.dto.rooms.DeviceResponseDTO;
 import code.model.entity.rooms.DevicesEntity;
 import code.repository.rooms.DevicesRepository;
 import code.util.RandomId;
@@ -58,12 +59,30 @@ public class DeviceServiceImpl implements  DeviceService {
     }
 
     @Override
-    public List<DevicesEntity> getAllDevices() {
-        return devicesRepository.findAll();
+    public List<DeviceResponseDTO> getAllDevices() {
+        List<DevicesEntity> devicesEntities = devicesRepository.findAll();
+        return devicesEntities.stream().map(device -> new DeviceResponseDTO(
+                device.getDeviceId(),
+                device.getDeviceName(),
+                device.getBrand()
+        )).toList();
     }
 
     @Override
     public DevicesEntity getDeviceById(String deviceId) {
         return devicesRepository.findById(deviceId).orElse(null);
+    }
+
+    @Override
+    public DeviceResponseDTO getDeviceByDeviceId(String deviceId) {
+        DevicesEntity devicesEntity = devicesRepository.findById(deviceId).orElse(null);
+        if(devicesEntity == null){
+            return null;
+        }
+        return new DeviceResponseDTO(
+                devicesEntity.getDeviceId(),
+                devicesEntity.getDeviceName(),
+                devicesEntity.getBrand()
+        );
     }
 }

@@ -1,0 +1,66 @@
+spring.application.name=Booking_Room_Project
+
+# Database Configuration
+spring.datasource.url=jdbc:postgresql://localhost:5432/your_database_name
+spring.datasource.username=your_db_username
+spring.datasource.password=your_db_password
+spring.datasource.driver-class-name=org.postgresql.Driver
+
+# JPA Configuration
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+
+# Redis Configuration
+spring.data.redis.host=localhost
+spring.data.redis.port=6379
+spring.data.redis.timeout=2000ms
+
+# Email Configuration
+spring.mail.host=smtp.gmail.com
+spring.mail.port=587
+spring.mail.username=your_email@gmail.com
+spring.mail.password=your_app_password
+
+spring.mail.properties.mail.smtp.auth=true
+spring.mail.properties.mail.smtp.starttls.enable=true
+spring.mail.properties.mail.smtp.ssl.trust=smtp.gmail.com
+
+# ===== JWT CONFIG =====
+
+# Secret key JWT (>= 32 characters)
+app.jwt.secret=YOUR_SECRET_KEY_AT_LEAST_32_CHARACTERS_LONG
+# Access token 15 minutes
+app.jwt.access-ttl-ms=900000
+# Refresh token 7 days
+app.jwt.refresh-ttl-ms=604800000
+
+# MoMo Payment Configuration
+momo.partner-code=MOMO
+momo.return-url=http://localhost:5173/app/payment-return
+momo.end-point=https://test-payment.momo.vn/v2/gateway/api/create
+momo.ipn-url=https://your-ngrok-url.ngrok-free.app/api/payment/ipn-handler
+momo.access-key=YOUR_MOMO_ACCESS_KEY
+momo.secret-key=YOUR_MOMO_SECRET_KEY
+momo.request-type=captureWallet
+
+# AWS Credentials
+aws.access.key.id=YOUR_AWS_ACCESS_KEY_ID
+aws.secret.access.key=YOUR_AWS_SECRET_ACCESS_KEY
+
+# AWS Region (Singapore)
+aws.s3.region=ap-southeast-1
+
+# S3 Bucket
+aws.s3.bucket.name=your-s3-bucket-name
+
+# Folders trong bucket
+aws.s3.folder.rooms=rooms
+aws.s3.folder.thumbnails=thumbnails
+
+# Upload config
+spring.servlet.multipart.max-file-size=10MB
+spring.servlet.multipart.max-request-size=10MB
+
+#opencage.api.key=YOUR_OPENCAGE_API_KEY
+

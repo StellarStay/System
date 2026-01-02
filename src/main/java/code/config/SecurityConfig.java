@@ -37,16 +37,10 @@ public class SecurityConfig {
                         // Auth endpoints - CHỈ login, register và refresh là public
                         .requestMatchers("/api/auth/login", "/api/auth/refresh").permitAll()
                         .requestMatchers("/api/auth/register/**").permitAll() // Register có nhiều steps
-
-                        // Payment webhook - CHỈ ipn-handler là public (MoMo callback)
-                        .requestMatchers("/api/payment/ipn-handler").permitAll()
-
-                        // Rooms - Public endpoints (xem phòng không cần đăng nhập)
+                        .requestMatchers("/api/payment/**").permitAll()
+                        .requestMatchers("/api/s3/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/rooms/get/**").permitAll()
-
-                        // Payment methods - Có thể public để guest xem
                         .requestMatchers(HttpMethod.GET, "/api/payment_method/**").permitAll()
-
                         // TẤT CẢ endpoints còn lại đều CẦN authentication
                         .anyRequest().authenticated()
                 );

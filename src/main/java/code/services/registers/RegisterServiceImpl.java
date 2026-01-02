@@ -12,6 +12,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -60,15 +61,18 @@ public class RegisterServiceImpl implements RegisterService {
     }
 
     @Override
-    public String saveTempUser(UserRequestDTO userRequestDTO) throws MessagingException {
+    public Map<String, String> saveTempUser(UserRequestDTO userRequestDTO) throws MessagingException {
         // Kiểm tra xem email đã tồn tại trong redis hay chưa
         if (stringRedisTemplate.opsForValue().get("user:temp:" + userRequestDTO.getEmail()) != null) {
-            return "Email already exists in pending registrations.";
+            throw new RuntimeException("Email already exists in pending registrations.");
         }
         // Mã hóa mật khẩu trước khi lưu tạm
         String encodedPassword = passwordEncoder.encode(userRequestDTO.getPassword());
         // Tạo OTP
         String otp = generateOtp();
+        // Tạo một VerificationTokenEntity để lưu vào redis cùng với otp
+        String verificationToken = RandomId.generateOtp(30);
+
         // Tạo ra một user tạm thời để lưu vào redis với dạng json
         UserRequestDTO tempUser = new UserRequestDTO();
         tempUser.setIdCard(userRequestDTO.getIdCard());
@@ -87,14 +91,28 @@ public class RegisterServiceImpl implements RegisterService {
         stringRedisTemplate.opsForValue().set("user:temp:" + userRequestDTO.getEmail(), tempUserJson, 5, TimeUnit.MINUTES);
         redisTemplate.opsForValue().set("otp:" + userRequestDTO.getEmail(), otp, 5, TimeUnit.MINUTES);
 
+        // Lưu verification token vào redis với thời gian hết hạn là 5 phút
+        redisTemplate.opsForValue().set("verificationToken:" + verificationToken, userRequestDTO.getEmail(), 5, TimeUnit.MINUTES);
+
         // Gửi otp về email
         emailService.sendOtpEmail(userRequestDTO.getEmail(), otp);
-        return "Registration successful! Please check your email for the OTP.";
+
+        // Trả verification token để FE lưu trên local storage và để xác thực otp
+        return Map.of(
+                "message", "Registration successful! Please check your email for the OTP.",
+                "verificationToken", verificationToken
+        );
     }
 
 
     @Override
-    public String verifyOtp(String email, String otp) {
+    public String verifyOtp(String verifyToken, String otp) {
+        // Lấy email từ verification token
+        String email = (String) redisTemplate.opsForValue().get("verificationToken:" + verifyToken);
+        if (email == null) {
+            return "Verification token has expired or is invalid.";
+        }
+
         // Lấy OTP từ Redis
         String storedOtp = (String) redisTemplate.opsForValue().get("otp:" + email);
         if (storedOtp == null) {
@@ -112,6 +130,7 @@ public class RegisterServiceImpl implements RegisterService {
                 // Xóa thông tin người dùng và otp được lưu tạm thời trong Redis
                 stringRedisTemplate.delete("user:temp:" + email);
                 redisTemplate.delete("otp:" + email);
+                redisTemplate.delete("verificationToken:" + verifyToken);
                 return "OTP verified successfully! Your registration is complete.";
             }
         }
