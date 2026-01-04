@@ -82,19 +82,19 @@ public class DataInit implements CommandLineRunner {
 
         // 1. Tạo Roles
         RoleEntity adminRole = new RoleEntity();
-        adminRole.setRoleId(RandomId.generateRoomId(10));
+        adminRole.setRoleId("admin");
         adminRole.setRoleName("ADMIN");
         adminRole.setDescription("Administrator with full access");
         roleRepository.save(adminRole);
 
         RoleEntity ownerRole = new RoleEntity();
-        ownerRole.setRoleId(RandomId.generateRoomId(10));
+        ownerRole.setRoleId("owner");
         ownerRole.setRoleName("OWNER");
         ownerRole.setDescription("Room owner who can manage their rooms");
         roleRepository.save(ownerRole);
 
         RoleEntity userRole = new RoleEntity();
-        userRole.setRoleId(RandomId.generateRoomId(10));
+        userRole.setRoleId("user");
         userRole.setRoleName("USER");
         userRole.setDescription("Regular user who can book rooms");
         roleRepository.save(userRole);

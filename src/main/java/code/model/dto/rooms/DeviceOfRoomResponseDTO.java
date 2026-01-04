@@ -4,11 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class DeviceOfRoomResponseDTO {
-    private String roomId;
-    private String deviceId;
-    private String status;
+    private String deviceName;
+    private boolean status;
 }

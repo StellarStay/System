@@ -6,8 +6,10 @@ import code.services.rooms.RoomsService;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -20,12 +22,16 @@ public class RoomController {
     private RoomsService roomsService;
 
     @PostMapping("/insertRoom")
-    public ResponseEntity<String> insertRoom(@RequestBody RoomRequestDTO roomRequestDTO){
-        boolean result = roomsService.insertRoom(roomRequestDTO);
-        if(result){
-            return ResponseEntity.ok("Room inserted successfully");
-        } else {
-            return ResponseEntity.status(500).body("Failed to insert room");
+    public ResponseEntity<String> insertRoom( @ModelAttribute RoomRequestDTO roomRequestDTO){
+        try {
+            boolean result = roomsService.insertRoom(roomRequestDTO);
+            if(result){
+                return ResponseEntity.ok("Room inserted successfully");
+            } else {
+                return ResponseEntity.status(500).body("Failed to insert room");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error: " + e.getMessage());
         }
     }
 

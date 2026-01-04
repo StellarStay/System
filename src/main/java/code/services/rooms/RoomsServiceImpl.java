@@ -7,12 +7,17 @@ import code.model.entity.rooms.ImageRoomEntity;
 import code.model.entity.rooms.RoomEntity;
 import code.model.entity.users.UserEntity;
 import code.repository.rooms.CategoriesRoomRepository;
+import code.repository.rooms.ImageRoomRepository;
 import code.repository.rooms.RoomRepository;
 import code.repository.users.UserRepository;
+import code.services.s3.S3Service;
 import code.services.users.UserService;
+import code.util.RandomId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -26,25 +31,53 @@ public class RoomsServiceImpl implements RoomsService{
     private UserService userService;
     @Autowired
     private CategoryRoomService categoryRoomService;
+    @Autowired
+    private ImageRoomRepository imageRoomRepository;
+    @Autowired
+    private S3Service s3Service;
 
+    private final int MAX_LENGTH_ROOM_ID = 10;
+    private final int MAX_LENGTH_IMAGE_ID = 15;
+
+    private String generateRoomId() {
+        String randomRoomId;
+        do {
+            randomRoomId = RandomId.generateRoomId(MAX_LENGTH_ROOM_ID);
+        } while (roomRepository.existsById(randomRoomId));
+        return randomRoomId;
+    }
+
+    private String generateImageId() {
+        String randomImageId;
+        do {
+            randomImageId = RandomId.generateRoomId(MAX_LENGTH_IMAGE_ID);
+        } while (imageRoomRepository.existsById(randomImageId));
+        return randomImageId;
+    }
 
     @Override
     public boolean insertRoom(RoomRequestDTO roomRequestDTO) {
-        RoomEntity roomEntity = new RoomEntity();
-        UserEntity ownerEntity = userService.getUser(roomRequestDTO.getOwnerId());
-        CategoriesRoomEntity cateRoom = categoryRoomService.getCategoryRoom(roomRequestDTO.getCategoriesId());
-        roomEntity.setRoomName(roomRequestDTO.getRoomName());
-        roomEntity.setTitle(roomRequestDTO.getTitle());
-        roomEntity.setDescription(roomRequestDTO.getDescription());
-        roomEntity.setAddress(roomRequestDTO.getAddress());
-        roomEntity.setPrice_per_night(roomRequestDTO.getPrice_per_night());
-        roomEntity.setMax_guests(roomRequestDTO.getMax_guests());
-        roomEntity.setCreatedAt(LocalDateTime.now());
-        roomEntity.setStatus("PENDING");
-        roomEntity.setOwner(ownerEntity);
-        roomEntity.setCategory(cateRoom);
-        roomRepository.save(roomEntity);
-        return true;
+            // Bước 1: Tạo RoomEntity
+            RoomEntity roomEntity = new RoomEntity();
+            UserEntity ownerEntity = userService.getUser(roomRequestDTO.getOwnerId());
+            CategoriesRoomEntity cateRoom = categoryRoomService.getCategoryRoomByCateId(roomRequestDTO.getCategoriesId());
+
+            roomEntity.setRoomId(generateRoomId());
+            roomEntity.setRoomName(roomRequestDTO.getRoomName());
+            roomEntity.setTitle(roomRequestDTO.getTitle());
+            roomEntity.setDescription(roomRequestDTO.getDescription());
+            roomEntity.setAddress(roomRequestDTO.getAddress());
+            roomEntity.setPrice_per_night(roomRequestDTO.getPrice_per_night());
+            roomEntity.setMax_guests(roomRequestDTO.getMax_guests());
+            roomEntity.setCreatedAt(LocalDateTime.now());
+            roomEntity.setStatus("PENDING");
+            roomEntity.setOwner(ownerEntity);
+            roomEntity.setCategory(cateRoom);
+
+            // Lưu RoomEntity trước
+            roomRepository.save(roomEntity);
+
+            return true;
     }
 
     @Override
@@ -54,7 +87,7 @@ public class RoomsServiceImpl implements RoomsService{
             return false;
         }
         UserEntity ownerEntity = userService.getUser(roomRequestDTO.getOwnerId());
-        CategoriesRoomEntity cateRoom = categoryRoomService.getCategoryRoom(roomRequestDTO.getCategoriesId());
+        CategoriesRoomEntity cateRoom = categoryRoomService.getCategoryRoomByCateId(roomRequestDTO.getCategoriesId());
         roomEntity.setRoomName(roomRequestDTO.getRoomName());
         roomEntity.setTitle(roomRequestDTO.getTitle());
         roomEntity.setDescription(roomRequestDTO.getDescription());
@@ -75,7 +108,8 @@ public class RoomsServiceImpl implements RoomsService{
         if (roomEntity == null) {
             return false;
         }
-        roomRepository.delete(roomEntity);
+        roomEntity.setStatus("INACTIVE");
+        roomRepository.save(roomEntity);
         return true;
     }
 

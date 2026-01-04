@@ -33,10 +33,10 @@ public class AuthService {
         }
 
         String userId = String.valueOf(user.getUserId());
-        String role = user.getRole().getRoleId();
+        String roleName = user.getRole().getRoleName();
 
         // Tạo access token
-        String access = jwtService.generateAccessToken(userId, user.getEmail(), role);
+        String access = jwtService.generateAccessToken(userId, user.getEmail(), roleName);
         // Tạo refresh token
         JwTService.RefreshTokenBundle refreshBundle = jwtService.generateRefreshToken(userId);
         // Lưu jti của refresh token vào Redis
@@ -75,11 +75,11 @@ public class AuthService {
             throw new RuntimeException("Refresh token is revoked");
         }
 
-        UserEntity user = userRepository.findById(String.valueOf(userId))
+        UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         // Tạo access token mới
-        String newAccess = jwtService.generateAccessToken(userId, user.getEmail(), user.getRole().getRoleId());
+        String newAccess = jwtService.generateAccessToken(userId, user.getEmail(), user.getRole().getRoleName());
         // Tạo refresh token mới
         JwTService.RefreshTokenBundle newRefresh = jwtService.generateRefreshToken(userId);
         refreshStore.save(userId, newRefresh.jti());

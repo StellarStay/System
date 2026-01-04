@@ -227,10 +227,38 @@ public class BookingServiceImpl implements BookingService {
             bookingResponseDTO.setActualCheckOutTime(bookingEntity.getActualCheckOutTime());
             bookingResponseDTO.setStatus(bookingEntity.getStatus());
             bookingResponseDTO.setTotalPrice(bookingEntity.getTotalPrice());
-            bookingResponseDTO.setUserId(bookingEntity.getUser().getUserId());
+            if (bookingEntity.getUser() == null){
+                bookingResponseDTO.setUserId(null);
+            }
+            else {
+                bookingResponseDTO.setUserId(bookingEntity.getUser().getUserId());
+            }
             bookingResponseDTO.setRoomId(bookingEntity.getRoom().getRoomId());
             return bookingResponseDTO;
         }
+    }
+
+    @Override
+    public List<BookingResponseDTO> getBookingsByUserId(String userId) {
+        List<BookingEntity> bookingEntityList = bookingRepository.findByUser_UserId(userId);
+        List<BookingResponseDTO> bookingResponseDTOList = new ArrayList<>();
+        for(BookingEntity bookingEntity : bookingEntityList) {
+            BookingResponseDTO bookingResponseDTO = new BookingResponseDTO();
+            bookingResponseDTO.setBookingId(bookingEntity.getBookingId());
+
+            bookingResponseDTO.setPlanCheckInTime(bookingEntity.getPlanCheckInTime());
+            bookingResponseDTO.setPlanCheckOutTime(bookingEntity.getPlanCheckOutTime());
+            bookingResponseDTO.setActualCheckInTime(bookingEntity.getActualCheckInTime());
+            bookingResponseDTO.setActualCheckOutTime(bookingEntity.getActualCheckOutTime());
+
+            bookingResponseDTO.setStatus(bookingEntity.getStatus());
+            bookingResponseDTO.setTotalPrice(bookingEntity.getTotalPrice());
+            bookingResponseDTO.setUserId(bookingEntity.getUser().getUserId());
+            bookingResponseDTO.setRoomId(bookingEntity.getRoom().getRoomId());
+
+            bookingResponseDTOList.add(bookingResponseDTO);
+        }
+        return bookingResponseDTOList;
     }
 
     @Override

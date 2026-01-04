@@ -6,6 +6,7 @@ import code.model.entity.users.UserEntity;
 import code.services.users.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,6 +17,7 @@ public class UsersController {
     @Autowired
     private UserService userService;
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/create_user")
     public ResponseEntity<String> createUser(@RequestBody UserRequestDTO userRequestDTO) {
         boolean isCreated = userService.insertUser(userRequestDTO);
@@ -51,6 +53,7 @@ public class UsersController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/get_all_users")
     public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
         List<UserEntity> userEntities = userService.getUsers();

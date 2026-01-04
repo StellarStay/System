@@ -12,6 +12,7 @@ public interface UserService {
     boolean updateUser(String userId, UserRequestDTO userRequestDTO);
     boolean deleteUser(String userId);
     UserEntity getUser(String userId);
+    UserResponseDTO getUserResponseDTO(String userId);
     List<UserEntity> getUsers();
     boolean isEmailExists(String email);
     UserEntity findByEmail(String email);

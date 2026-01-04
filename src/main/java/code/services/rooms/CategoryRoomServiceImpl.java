@@ -1,12 +1,14 @@
 package code.services.rooms;
 
 import code.model.dto.rooms.CategoryRoomRequestDTO;
+import code.model.dto.rooms.CategoryRoomResponseDTO;
 import code.model.entity.rooms.CategoriesRoomEntity;
 import code.repository.rooms.CategoriesRoomRepository;
 import code.util.RandomId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -52,12 +54,31 @@ public class CategoryRoomServiceImpl implements CategoryRoomService {
     }
 
     @Override
-    public CategoriesRoomEntity getCategoryRoom(String cateRoomId) {
+    public CategoriesRoomEntity getCategoryRoomByCateId(String cateRoomId) {
         return categoriesRoomRepository.findById(cateRoomId).orElse(null);
     }
 
     @Override
-    public List<CategoriesRoomEntity> getAllCategoriesRoom(String cateRoomId) {
-        return categoriesRoomRepository.findAll();
+    public CategoryRoomResponseDTO getCategoryRoomResponseDTOByCateId(String cateRoomId) {
+        CategoriesRoomEntity categoriesRoomEntity = categoriesRoomRepository.findById(cateRoomId).orElse(null);
+        if(categoriesRoomEntity == null){
+            return null;
+        }
+        CategoryRoomResponseDTO categoryRoomResponseDTO = new CategoryRoomResponseDTO();
+        categoryRoomResponseDTO.setCategoryName(categoriesRoomEntity.getCategoryName());
+        return categoryRoomResponseDTO;
+    }
+
+    @Override
+    public List<CategoryRoomResponseDTO> getAllCategoriesRoom(String cateRoomId) {
+        List<CategoriesRoomEntity> categoriesRoomEntities = categoriesRoomRepository.findAll();
+        List<CategoryRoomResponseDTO> categoryRoomResponseDTOList = new ArrayList<>();
+
+        for (CategoriesRoomEntity categoriesRoomEntity : categoriesRoomEntities) {
+            CategoryRoomResponseDTO categoryRoomResponseDTO = new CategoryRoomResponseDTO();
+            categoryRoomResponseDTO.setCategoryName(categoriesRoomEntity.getCategoryName());
+            categoryRoomResponseDTOList.add(categoryRoomResponseDTO);
+        }
+        return categoryRoomResponseDTOList;
     }
 }

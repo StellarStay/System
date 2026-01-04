@@ -65,14 +65,14 @@ public class JwTAuthFilter extends OncePerRequestFilter {
 
                 // Nếu token là access token và chưa hết hạn thì tạo đối tượng Authentication và lưu vào SecurityContextHolder
                 if ("access".equals(tokenType) && !isExpired) {
-                    // Lấy userId và role từ claims
+                    // Lấy userId và roleName từ claims
                     String userId = claims.getSubject();
-                    String role = claims.get("role", String.class);
+                    String roleName = claims.get("roleName", String.class);
 
-                    logger.debug("Authenticated user: {} with role: {}", userId, role);
+                    logger.debug("Authenticated user: {} with roleName: {}", userId, roleName);
 
-                    // Tạo danh sách authority từ role
-                    var authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
+                    // Tạo danh sách authority từ roleName
+                    var authorities = List.of(new SimpleGrantedAuthority("ROLE_" + roleName));
                     var authentication = new UsernamePasswordAuthenticationToken(userId, null, authorities);
                     // Lưu đối tượng Authentication vào SecurityContextHolder để sử dụng trong các phần khác của ứng dụng
                     SecurityContextHolder.getContext().setAuthentication(authentication);

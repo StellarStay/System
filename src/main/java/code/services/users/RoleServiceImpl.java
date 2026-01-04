@@ -25,16 +25,6 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public boolean insertRole(RoleRequestDTO roleRequestDTO) {
-        RoleEntity roleEntity = new RoleEntity();
-        roleEntity.setRoleId(generateRoleId());
-        roleEntity.setRoleName(roleRequestDTO.getRoleName());
-        roleEntity.setDescription(roleRequestDTO.getDescription());
-        roleRepository.save(roleEntity);
-        return true;
-    }
-
-    @Override
     public boolean updateRole(String roleId, RoleRequestDTO roleRequestDTO) {
         RoleEntity roleEntity = roleRepository.findById(roleId).orElse(null);
         if (roleEntity == null) {

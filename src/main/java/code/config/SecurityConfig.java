@@ -4,6 +4,7 @@ import code.services.token.JwTAuthFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -15,6 +16,7 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
     @Bean
@@ -41,6 +43,10 @@ public class SecurityConfig {
                         .requestMatchers("/api/s3/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/rooms/get/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/payment_method/**").permitAll()
+
+                        // Admin-only endpoints
+                        .requestMatchers("/api/users/create_user", "/api/users/get_all_users").hasRole("ADMIN")
+
                         // TẤT CẢ endpoints còn lại đều CẦN authentication
                         .anyRequest().authenticated()
                 );

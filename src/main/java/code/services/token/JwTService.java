@@ -30,12 +30,12 @@ public class JwTService {
     }
 
     // Generate ra JWT access token với thông tin userId, email, role khi user đăng nhập thành công
-    public String generateAccessToken(String userId, String email, String role) {
+    public String generateAccessToken(String userId, String email, String roleName) {
         long now = System.currentTimeMillis();
         return Jwts.builder()
                 .setSubject(userId)
                 .claim("email", email)
-                .claim("role", role)
+                .claim("roleName", roleName)
                 .claim("type", "access")
                 .setIssuedAt(new Date(now))
                 .setExpiration(new Date(now + accessTtlMs))

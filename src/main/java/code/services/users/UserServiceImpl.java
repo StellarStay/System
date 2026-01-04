@@ -1,6 +1,7 @@
 package code.services.users;
 
 import code.model.dto.users.UserRequestDTO;
+import code.model.dto.users.UserResponseDTO;
 import code.model.entity.users.RoleEntity;
 import code.model.entity.users.UserEntity;
 import code.repository.users.UserRepository;
@@ -87,6 +88,30 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserEntity getUser(String userId) {
         return userRepository.findById(userId).orElse(null);
+    }
+
+    @Override
+    public UserResponseDTO getUserResponseDTO(String userId) {
+        UserEntity userEntity = userRepository.findById(userId).orElse(null);
+        if (userEntity == null) {
+            return null;
+        }
+        UserResponseDTO userResponseDTO = new UserResponseDTO();
+
+        userResponseDTO.setUserId(userId);
+        userResponseDTO.setIdCard(userEntity.getIdCard());
+        userResponseDTO.setFirstName(userEntity.getFirstName());
+        userResponseDTO.setLastName(userEntity.getLastName());
+        userResponseDTO.setDateOfBirth(userEntity.getDateOfBirth());
+        userResponseDTO.setPhone(userEntity.getPhone());
+        userResponseDTO.setEmail(userEntity.getEmail());
+        userResponseDTO.setPassword(userEntity.getPassword());
+        userResponseDTO.setGender(userEntity.isGender());
+        userResponseDTO.setCreatedAt(userEntity.getCreatedAt());
+        userResponseDTO.setStatus(userEntity.isStatus());
+        userResponseDTO.setRoleId(userEntity.getRole().getRoleId());
+
+        return userResponseDTO;
     }
 
     @Override

@@ -62,10 +62,17 @@ public class RegisterServiceImpl implements RegisterService {
 
     @Override
     public Map<String, String> saveTempUser(UserRequestDTO userRequestDTO) throws MessagingException {
-        // Kiểm tra xem email đã tồn tại trong redis hay chưa
-        if (stringRedisTemplate.opsForValue().get("user:temp:" + userRequestDTO.getEmail()) != null) {
-            throw new RuntimeException("Email already exists in pending registrations.");
+        // Kiểm tra xem email đã tồn tại trong database chưa
+        if (userService.isEmailExists(userRequestDTO.getEmail())) {
+            throw new RuntimeException("Email already exists in database.");
         }
+
+        // Kiểm tra xem email đã có trong Redis (đang pending verify) chưa
+        String existingTempUser = stringRedisTemplate.opsForValue().get("user:temp:" + userRequestDTO.getEmail());
+        if (existingTempUser != null) {
+            throw new RuntimeException("Email is already registered and pending verification. Please check your email for OTP or wait 5 minutes to register again.");
+        }
+
         // Mã hóa mật khẩu trước khi lưu tạm
         String encodedPassword = passwordEncoder.encode(userRequestDTO.getPassword());
         // Tạo OTP
@@ -78,7 +85,7 @@ public class RegisterServiceImpl implements RegisterService {
         tempUser.setIdCard(userRequestDTO.getIdCard());
         tempUser.setPhone(userRequestDTO.getPhone());
         tempUser.setDateOfBirth(userRequestDTO.getDateOfBirth());
-        tempUser.setRoleId(userRequestDTO.getRoleId());
+        tempUser.setRoleId("user"); // Mặc định role là ROLE_USER
         tempUser.setGender(userRequestDTO.isGender());
         tempUser.setEmail(userRequestDTO.getEmail());
         tempUser.setPassword(encodedPassword);

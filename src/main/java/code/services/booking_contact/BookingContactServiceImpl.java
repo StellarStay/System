@@ -2,9 +2,11 @@ package code.services.booking_contact;
 
 import code.model.dto.booking.TempBookingBeforePaymentDTO;
 import code.model.dto.booking_contact.BookingContactRequestDTO;
+import code.model.dto.booking_contact.BookingContactResponseDTO;
 import code.model.entity.booking.BookingEntity;
 import code.model.entity.booking_contact.BookingContactEntity;
 import code.repository.booking_contact.BookingContactRepository;
+import code.services.booking.BookingService;
 import code.services.booking.TempBookingService;
 import code.util.RandomId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,9 +18,10 @@ import java.time.LocalDateTime;
 public class BookingContactServiceImpl implements BookingContactService {
 
     @Autowired
-    private TempBookingService tempBookingService;
-    @Autowired
     private BookingContactRepository bookingContactRepository;
+    @Autowired
+    private BookingService bookingService;
+
 
     int max_length_payment_id = 8;
     private String generateBookingContactId() {
@@ -54,6 +57,24 @@ public class BookingContactServiceImpl implements BookingContactService {
         bookingContactRepository.save(bookingContactEntity);
 
         return bookingContactEntity;
+
+    }
+
+    @Override
+    public BookingContactResponseDTO getBookingContactResponseDTOByBookingId(String bookingId) {
+        BookingContactEntity bookingContactEntity = bookingContactRepository.findByBooking_BookingId(bookingId);
+        if (bookingContactEntity == null) {
+            return null;
+        } else {
+            BookingContactResponseDTO bookingContactResponseDTO = new BookingContactResponseDTO();
+            bookingContactResponseDTO.setBookingId(bookingContactEntity.getBooking().getBookingId());
+            bookingContactResponseDTO.setFirstName(bookingContactEntity.getFirstName());
+            bookingContactResponseDTO.setLastName(bookingContactEntity.getLastName());
+            bookingContactResponseDTO.setEmail(bookingContactEntity.getEmail());
+            bookingContactResponseDTO.setPhoneNumber(bookingContactEntity.getPhoneNumber());
+            bookingContactResponseDTO.setCreatedAt(bookingContactEntity.getCreatedAt());
+            return bookingContactResponseDTO;
+        }
 
     }
 }
