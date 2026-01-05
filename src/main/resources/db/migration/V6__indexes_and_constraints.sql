@@ -1,0 +1,16 @@
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_users_id_card ON users(id_card);
+CREATE INDEX idx_rooms_owner ON rooms(owner_id);
+CREATE INDEX idx_rooms_category ON rooms(category_id);
+CREATE INDEX idx_bookings_user ON bookings(user_booking_id);
+CREATE INDEX idx_bookings_room ON bookings(room_id);
+CREATE INDEX idx_payments_booking ON payments(booking_id);
+CREATE INDEX idx_notifications_user ON notifications(user_receiver_id);
+CREATE INDEX idx_reviews_room ON reviews(room_id);
+CREATE INDEX idx_reviews_user_rated ON reviews(user_rated_id);
+CREATE INDEX idx_chat_room ON chat_messages(room_id);
+CREATE INDEX idx_chat_sender ON chat_messages(sender_id);
+CREATE INDEX idx_chat_receiver ON chat_messages(receiver_id);
+CREATE INDEX idx_device_of_room_device ON device_of_room(device_id);
+CREATE INDEX idx_device_of_room_room ON device_of_room(room_id);
+CREATE INDEX idx_booking_contact_booking ON booking_contact(booking_id);

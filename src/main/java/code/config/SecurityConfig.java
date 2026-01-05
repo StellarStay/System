@@ -46,6 +46,7 @@ public class SecurityConfig {
 
                         // Admin-only endpoints
                         .requestMatchers("/api/users/create_user", "/api/users/get_all_users").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/rooms/insertRoom", "api/rooms/updateRoom").hasAnyRole("ADMIN", "OWNER")
 
                         // TẤT CẢ endpoints còn lại đều CẦN authentication
                         .anyRequest().authenticated()

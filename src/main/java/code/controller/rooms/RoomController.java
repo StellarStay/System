@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -21,6 +22,7 @@ public class RoomController {
     @Autowired
     private RoomsService roomsService;
 
+    @PreAuthorize("hasAnyRole('ADMIN','OWNER')")
     @PostMapping("/insertRoom")
     public ResponseEntity<String> insertRoom( @ModelAttribute RoomRequestDTO roomRequestDTO){
         try {
@@ -34,7 +36,7 @@ public class RoomController {
             return ResponseEntity.status(500).body("Error: " + e.getMessage());
         }
     }
-
+    @PreAuthorize("hasAnyRole('ADMIN', 'OWNER')")
     @PostMapping("/updateRoom/{roomId}")
     public ResponseEntity<String> updateRoom(@PathVariable String roomId, @RequestBody RoomRequestDTO roomRequestDTO){
         boolean result = roomsService.updateRoom(roomId, roomRequestDTO);
@@ -60,7 +62,6 @@ public class RoomController {
             return ResponseEntity.status(404).body(null);
         }
     }
-
 
     @GetMapping("/get/getByMaxGuests")
     public ResponseEntity<?> getByMaxGuests(@RequestParam int maxGuests){
