@@ -3,7 +3,6 @@ package code.services.booking;
 import code.model.dto.booking.GuestBookingRequestDTO;
 import code.model.dto.booking.UserBookingRequestDTO;
 import code.model.dto.booking.BookingResponseDTO;
-import code.model.dto.rooms.RoomResponseDTO;
 import code.model.entity.booking.BookingEntity;
 
 import java.time.LocalDateTime;

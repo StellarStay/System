@@ -1,4 +1,4 @@
-package code.model.dto.rooms;
+package code.model.dto.rooms.res;
 
 public class ImageRoomResponseDTO {
 }

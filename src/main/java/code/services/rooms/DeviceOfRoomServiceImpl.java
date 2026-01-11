@@ -1,8 +1,10 @@
 package code.services.rooms;
 
-import code.model.dto.rooms.DeviceOfRoomRequestDTO;
-import code.model.dto.rooms.DeviceOfRoomResponseDTO;
-import code.model.dto.rooms.DeviceOfRoomUpdateDTO;
+import code.exception.BadRequestException;
+import code.exception.ResourceNotFoundException;
+import code.model.dto.rooms.req.DeviceOfRoomRequestDTO;
+import code.model.dto.rooms.res.DeviceOfRoomResponseDTO;
+import code.model.dto.rooms.req.DeviceOfRoomUpdateDTO;
 import code.model.entity.rooms.DeviceOfRoomEntity;
 import code.model.entity.rooms.DevicesEntity;
 import code.model.entity.rooms.RoomEntity;
@@ -34,9 +36,12 @@ public class DeviceOfRoomServiceImpl implements DeviceOfRoomService {
     }
     @Override
     public boolean insertDeviceToRoom(DeviceOfRoomRequestDTO deviceOfRoomRequestDTO) {
+        if (deviceOfRoomRequestDTO == null){
+            throw new BadRequestException("DeviceOfRoomRequestDTO is null");
+        }
         RoomEntity roomEntity = roomsService.getRoomById(deviceOfRoomRequestDTO.getRoomId());
         if (roomEntity == null) {
-            return false;
+            throw new ResourceNotFoundException("Room Not Found");
         }
 
         // Lặp qua tất cả deviceIds và insert từng device vào phòng
@@ -59,9 +64,12 @@ public class DeviceOfRoomServiceImpl implements DeviceOfRoomService {
 
     @Override
     public boolean updateDeviceOfRoom(String deviceOfRoomId, DeviceOfRoomUpdateDTO deviceOfRoomUpdateDTO) {
+        if (deviceOfRoomId == null || deviceOfRoomUpdateDTO == null){
+            throw new BadRequestException("DeviceOfRoomId or DeviceOfRoomUpdateDTO is null");
+        }
         DeviceOfRoomEntity deviceOfRoomEntity = deviceOfRoomRepository.findById(deviceOfRoomId).orElse(null);
         if(deviceOfRoomEntity == null) {
-            return false;
+            throw new ResourceNotFoundException("DeviceOfRoom Not Found");
         }
         RoomEntity roomEntity = roomsService.getRoomById(deviceOfRoomUpdateDTO.getRoomId());
         DevicesEntity devicesEntity = deviceService.getDeviceById(deviceOfRoomUpdateDTO.getDeviceId());
@@ -74,9 +82,12 @@ public class DeviceOfRoomServiceImpl implements DeviceOfRoomService {
 
     @Override
     public boolean deleteDeviceOfRoom(String deviceOfRoomId) {
+        if (deviceOfRoomId == null) {
+            throw new BadRequestException("DeviceOfRoomId is null");
+        }
         DeviceOfRoomEntity deviceOfRoomEntity = deviceOfRoomRepository.findById(deviceOfRoomId).orElse(null);
         if(deviceOfRoomEntity == null) {
-            return false;
+            throw new ResourceNotFoundException("DeviceOfRoom Not Found");
         }
         deviceOfRoomRepository.delete(deviceOfRoomEntity);
         return true;
@@ -84,6 +95,9 @@ public class DeviceOfRoomServiceImpl implements DeviceOfRoomService {
 
     @Override
     public List<DeviceOfRoomResponseDTO> getAllDevicesOfRoom(String roomId) {
+        if (roomId == null) {
+            throw new BadRequestException("RoomId is null");
+        }
         List<DeviceOfRoomEntity> deviceOfRoomEntities = deviceOfRoomRepository.findByRoom_RoomId(roomId);
         List<DeviceOfRoomResponseDTO> deviceOfRoomResponseDTOS = new ArrayList<>();
         for (DeviceOfRoomEntity deviceOfRoomEntity : deviceOfRoomEntities) {

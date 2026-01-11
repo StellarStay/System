@@ -1,16 +1,14 @@
 package code.controller.rooms;
 
-import code.model.dto.rooms.RoomRequestDTO;
-import code.model.dto.rooms.RoomResponseDTO;
+import code.model.dto.rooms.req.RoomRequestDTO;
+import code.model.dto.rooms.res.RoomResponseDTO;
 import code.services.rooms.RoomsService;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

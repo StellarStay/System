@@ -1,8 +1,8 @@
 package code.controller.devices;
 
-import code.model.dto.rooms.DeviceRequestDTO;
-import code.model.dto.rooms.DeviceResponseDTO;
-import code.model.entity.rooms.DevicesEntity;
+import code.exception.BadRequestException;
+import code.model.dto.rooms.req.DeviceRequestDTO;
+import code.model.dto.rooms.res.DeviceResponseDTO;
 import code.services.rooms.DeviceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,7 +19,7 @@ public class DeviceController {
     @PostMapping("/insert_device")
     public ResponseEntity<Boolean> insertDevice(@RequestBody DeviceRequestDTO deviceRequestDTO) {
         if (deviceRequestDTO == null) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            throw new BadRequestException("DeviceRequestDTO is null");
         }
         return ResponseEntity.ok(deviceService.insertDevice(deviceRequestDTO));
     }
@@ -27,7 +27,7 @@ public class DeviceController {
     @PutMapping("/update_device/{deviceId}")
     public ResponseEntity<Boolean> updateDevice(@PathVariable String deviceId, @RequestBody DeviceRequestDTO deviceRequestDTO) {
         if (deviceRequestDTO == null || deviceId == null || deviceId.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            throw new BadRequestException("Some fields is null");
         }
         return ResponseEntity.ok(deviceService.updateDevice(deviceId, deviceRequestDTO));
     }
@@ -35,7 +35,7 @@ public class DeviceController {
     @DeleteMapping("/delete_device/{deviceId}")
     public ResponseEntity<Boolean> deleteDevice(@PathVariable String deviceId) {
         if (deviceId == null || deviceId.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            throw new BadRequestException("DeviceId is null");
         }
         deviceService.deleteDevice(deviceId);
         return ResponseEntity.ok(true);
@@ -49,7 +49,7 @@ public class DeviceController {
     @GetMapping("/get_device_by_id/{deviceId}")
     public ResponseEntity<DeviceResponseDTO> getDeviceById(@PathVariable String deviceId){
         if (deviceId == null || deviceId.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            throw new BadRequestException("DeviceId is null");
         }
         DeviceResponseDTO deviceResponseDTO = deviceService.getDeviceByDeviceId(deviceId);
         return ResponseEntity.ok(deviceResponseDTO);

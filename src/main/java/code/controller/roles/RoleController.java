@@ -1,6 +1,6 @@
 package code.controller.roles;
 
-import code.model.dto.users.RoleRequestDTO;
+import code.model.dto.users.req.RoleRequestDTO;
 import code.model.entity.users.RoleEntity;
 import code.services.users.RoleService;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,5 +1,7 @@
 package code.services.booking_contact;
 
+import code.exception.BadRequestException;
+import code.exception.ResourceNotFoundException;
 import code.model.dto.booking.TempBookingBeforePaymentDTO;
 import code.model.dto.booking_contact.BookingContactRequestDTO;
 import code.model.dto.booking_contact.BookingContactResponseDTO;
@@ -35,6 +37,9 @@ public class BookingContactServiceImpl implements BookingContactService {
     @Override
     public BookingContactEntity insertBookingContact(BookingEntity bookingEntity, BookingContactRequestDTO bookingContactRequestDTO) {
         BookingContactEntity bookingContactEntity = new BookingContactEntity();
+        if (bookingEntity == null || bookingEntity.getBookingId() == null) {
+            throw new BadRequestException("Invalid booking entity request");
+        }
         bookingContactEntity.setId(generateBookingContactId());
         bookingContactEntity.setBooking(bookingEntity);
 
@@ -46,7 +51,7 @@ public class BookingContactServiceImpl implements BookingContactService {
         }
         else{
             if (bookingContactRequestDTO == null) {
-                throw new RuntimeException("Guest contact is required");
+                throw new BadRequestException("Invalid booking contact request");
             }
             bookingContactEntity.setFirstName(bookingContactRequestDTO.getFirstName());
             bookingContactEntity.setLastName(bookingContactRequestDTO.getLastName());
@@ -62,9 +67,12 @@ public class BookingContactServiceImpl implements BookingContactService {
 
     @Override
     public BookingContactResponseDTO getBookingContactResponseDTOByBookingId(String bookingId) {
+        if (bookingId == null){
+            throw new BadRequestException("Invalid booking id request");
+        }
         BookingContactEntity bookingContactEntity = bookingContactRepository.findByBooking_BookingId(bookingId);
         if (bookingContactEntity == null) {
-            return null;
+            throw new ResourceNotFoundException("Booking contact not found for booking");
         } else {
             BookingContactResponseDTO bookingContactResponseDTO = new BookingContactResponseDTO();
             bookingContactResponseDTO.setBookingId(bookingContactEntity.getBooking().getBookingId());

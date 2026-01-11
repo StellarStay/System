@@ -1,6 +1,6 @@
 package code.services.users;
 
-import code.model.dto.users.RoleRequestDTO;
+import code.model.dto.users.req.RoleRequestDTO;
 import code.model.entity.users.RoleEntity;
 
 import java.util.List;

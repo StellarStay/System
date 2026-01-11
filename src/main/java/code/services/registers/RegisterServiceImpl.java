@@ -1,6 +1,8 @@
 package code.services.registers;
 
-import code.model.dto.users.UserRequestDTO;
+import code.exception.BadRequestException;
+import code.exception.ConflictException;
+import code.model.dto.users.req.UserRequestDTO;
 import code.services.email.EmailService;
 import code.services.users.UserService;
 import code.util.RandomId;
@@ -64,13 +66,13 @@ public class RegisterServiceImpl implements RegisterService {
     public Map<String, String> saveTempUser(UserRequestDTO userRequestDTO) throws MessagingException {
         // Kiểm tra xem email đã tồn tại trong database chưa
         if (userService.isEmailExists(userRequestDTO.getEmail())) {
-            throw new RuntimeException("Email already exists in database.");
+            throw new ConflictException("Email already exists in database");
         }
 
         // Kiểm tra xem email đã có trong Redis (đang pending verify) chưa
         String existingTempUser = stringRedisTemplate.opsForValue().get("user:temp:" + userRequestDTO.getEmail());
         if (existingTempUser != null) {
-            throw new RuntimeException("Email is already registered and pending verification. Please check your email for OTP or wait 5 minutes to register again.");
+            throw new ConflictException("Email is already registered and pending verification. Please check your email for OTP or wait 5 minutes to register again");
         }
 
         // Mã hóa mật khẩu trước khi lưu tạm
@@ -117,13 +119,13 @@ public class RegisterServiceImpl implements RegisterService {
         // Lấy email từ verification token
         String email = (String) redisTemplate.opsForValue().get("verificationToken:" + verifyToken);
         if (email == null) {
-            return "Verification token has expired or is invalid.";
+            throw new BadRequestException("Verification token has expired or is invalid");
         }
 
         // Lấy OTP từ Redis
         String storedOtp = (String) redisTemplate.opsForValue().get("otp:" + email);
         if (storedOtp == null) {
-            return "OTP has expired or does not exist.";
+            throw new BadRequestException("OTP has expired or does not exist");
         }
 
         // Compare OTP
@@ -141,7 +143,6 @@ public class RegisterServiceImpl implements RegisterService {
                 return "OTP verified successfully! Your registration is complete.";
             }
         }
-
-        return "Invalid OTP. Please try again.";
+        throw new BadRequestException("Invalid OTP. Please try again");
     }
 }

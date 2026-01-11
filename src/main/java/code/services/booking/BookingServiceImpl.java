@@ -1,10 +1,12 @@
 package code.services.booking;
 
+import code.exception.BadRequestException;
+import code.exception.ConflictException;
+import code.exception.ResourceNotFoundException;
 import code.model.dto.booking.GuestBookingRequestDTO;
 import code.model.dto.booking.TempBookingBeforePaymentDTO;
 import code.model.dto.booking.UserBookingRequestDTO;
 import code.model.dto.booking.BookingResponseDTO;
-import code.model.dto.rooms.RoomResponseDTO;
 import code.model.entity.booking.BookingEntity;
 import code.model.entity.rooms.RoomEntity;
 import code.model.entity.users.UserEntity;
@@ -43,14 +45,17 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public String prepareGuestBooking(GuestBookingRequestDTO guestBookingRequestDTO) {
+        if (guestBookingRequestDTO == null) {
+            throw new BadRequestException("Guest Booking Request is null");
+        }
         RoomEntity roomEntity = roomsService.getRoomById(guestBookingRequestDTO.getRoomId());
         if (roomEntity == null) {
-            return "Room is not exist";
+            throw new ResourceNotFoundException("Room is not exist");
         }
         boolean checkAvailable = checkRoomAvailability(guestBookingRequestDTO.getRoomId(),
                 guestBookingRequestDTO.getPlanCheckInTime(), guestBookingRequestDTO.getPlanCheckOutTime());
         if (!checkAvailable) {
-            return "Room is not available in selected time";
+            throw new ResourceNotFoundException("Room is not available in selected time");
         }
         int nightForBook = Math.toIntExact(ChronoUnit.DAYS.between(guestBookingRequestDTO.getPlanCheckInTime(), guestBookingRequestDTO.getPlanCheckOutTime()));
         BigDecimal priceForBook = (BigDecimal.valueOf(nightForBook).multiply(roomEntity.getPrice_per_night()));
@@ -69,18 +74,21 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public String prepareUserBooking(UserBookingRequestDTO bookingRequestDTO, String userId) {
+        if (bookingRequestDTO == null || userId == null) {
+            throw new BadRequestException("User Booking Request or User Id is null");
+        }
         RoomEntity roomEntity = roomsService.getRoomById(bookingRequestDTO.getRoomId());
         UserEntity userEntity = userService.getUser(userId);
         if (roomEntity == null) {
-            return "Room is not exist";
+            throw new ResourceNotFoundException("Room is not exist");
         }
         if (userEntity == null) {
-            return "User is not exist";
+            throw new ResourceNotFoundException("User is not exist");
         }
         boolean checkAvailable = checkRoomAvailability(bookingRequestDTO.getRoomId(),
                 bookingRequestDTO.getPlanCheckInTime(), bookingRequestDTO.getPlanCheckOutTime());
         if (!checkAvailable) {
-            return "Room is not available in selected time";
+            throw new ResourceNotFoundException("Room is not available in selected time");
         }
         int nightForBook = Math.toIntExact(ChronoUnit.DAYS.between(bookingRequestDTO.getPlanCheckInTime(), bookingRequestDTO.getPlanCheckOutTime()));
         BigDecimal priceForBook = (BigDecimal.valueOf(nightForBook).multiply(roomEntity.getPrice_per_night()));
@@ -99,12 +107,15 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingEntity insertBookingFromTemp(String tempBookingId) {
+        if (tempBookingId == null) {
+            throw new BadRequestException("TempBooking Id is null");
+        }
         System.out.println("  📝 insertBookingFromTemp called with tempBookingId: " + tempBookingId);
 
         TempBookingBeforePaymentDTO tempBooking = tempBookingService.get(tempBookingId);
         if (tempBooking == null) {
             System.out.println("  ❌ ERROR: TempBooking not found in insertBookingFromTemp");
-            throw new RuntimeException("TempBooking not found");
+            throw new ResourceNotFoundException("TempBooking is not exist");
         }
         System.out.println("  ✅ TempBooking retrieved successfully");
 
@@ -112,7 +123,7 @@ public class BookingServiceImpl implements BookingService {
         RoomEntity roomEntity = roomsService.getRoomById(tempBooking.getRoomId());
         if (roomEntity == null) {
             System.out.println("  ❌ ERROR: Room not found: " + tempBooking.getRoomId());
-            throw new RuntimeException("Room is not exist");
+            throw new ResourceNotFoundException("Room is not exist");
         }
         System.out.println("  ✅ Room found: " + roomEntity.getRoomId());
 
@@ -150,10 +161,12 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public boolean updateActualCheckInTime(String bookingId, UserBookingRequestDTO userBookingRequestDTO) {
         // Phần update này chỉ dành cho Host/Admin và nó chỉ được update khi nào mà khách hàng đến nơi và check in
-
+        if (bookingId == null || userBookingRequestDTO == null) {
+            throw new BadRequestException("Booking Id or User Booking Request is null");
+        }
         BookingEntity bookingEntity = bookingRepository.findById(bookingId).orElse(null);
         if (bookingEntity == null) {
-            return false;
+            throw new ResourceNotFoundException("Booking is not found");
         }
         bookingEntity.setStatus("CONFIRMED");
         bookingEntity.setActualCheckInTime(LocalDateTime.now());
@@ -167,7 +180,7 @@ public class BookingServiceImpl implements BookingService {
 
         BookingEntity bookingEntity = bookingRepository.findById(bookingId).orElse(null);
         if (bookingEntity == null) {
-            return false;
+            throw new ResourceNotFoundException("Booking is not found");
         }
         bookingEntity.setStatus("COMPLETED");
         bookingEntity.setActualCheckOutTime(LocalDateTime.now());
@@ -177,9 +190,12 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public boolean cancelBooking(String bookingId) {
+        if (bookingId == null) {
+            throw new BadRequestException("Booking Id is null");
+        }
         BookingEntity bookingEntity = bookingRepository.findById(bookingId).orElse(null);
         if (bookingEntity == null) {
-            return false;
+            throw new ResourceNotFoundException("Booking is not found");
         }
         bookingEntity.setStatus("CANCELLED");
         bookingRepository.save(bookingEntity);
@@ -189,6 +205,9 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public List<BookingResponseDTO> getAllBookings() {
         List<BookingEntity> bookingEntityList = bookingRepository.findAll();
+        if (bookingEntityList.isEmpty()) {
+            throw new ResourceNotFoundException("Booking list is not found");
+        }
         List<BookingResponseDTO> bookingResponseDTOList = new ArrayList<>();
         for(BookingEntity bookingEntity : bookingEntityList) {
             BookingResponseDTO bookingResponseDTO = new BookingResponseDTO();
@@ -210,15 +229,22 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingEntity getBookingById(String bookingId) {
+        if (bookingId == null) {
+            throw new BadRequestException("Booking Id is null");
+        }
         return bookingRepository.findById(bookingId).orElse(null);
     }
 
     @Override
     public BookingResponseDTO getBookingResponseById(String bookingId) {
+        if (bookingId == null) {
+            throw new BadRequestException("Booking Id is null");
+        }
         BookingEntity bookingEntity = bookingRepository.findById(bookingId).orElse(null);
         if (bookingEntity == null) {
-            return null;
-        } else {
+            throw new ResourceNotFoundException("Booking is not found");
+        }
+        else {
             BookingResponseDTO bookingResponseDTO = new BookingResponseDTO();
             bookingResponseDTO.setBookingId(bookingEntity.getBookingId());
             bookingResponseDTO.setPlanCheckInTime(bookingEntity.getPlanCheckInTime());
@@ -240,7 +266,13 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<BookingResponseDTO> getBookingsByUserId(String userId) {
+        if (userId == null) {
+            throw new BadRequestException("User Id is null");
+        }
         List<BookingEntity> bookingEntityList = bookingRepository.findByUser_UserId(userId);
+        if (bookingEntityList.isEmpty()) {
+            throw new ResourceNotFoundException("Can't find user from booking list");
+        }
         List<BookingResponseDTO> bookingResponseDTOList = new ArrayList<>();
         for(BookingEntity bookingEntity : bookingEntityList) {
             BookingResponseDTO bookingResponseDTO = new BookingResponseDTO();
@@ -269,9 +301,12 @@ public class BookingServiceImpl implements BookingService {
         // Nếu trùng thời gian nhưng trạng thái là CANCELLED thì vẫn được duyệt qua và cho đặt
         // Ngược lại nếu trùng thời gian và trạng thái là PENDING hoặc CONFIRMED thì không cho đặt
         // Chỉ duy nhất trạng thái CANCELLED(có thể trùng thời gian) hoặc không trùng thời gian mới được phép đặt
+        if (roomId == null || planCheckInTime == null || planCheckOutTime == null) {
+            throw new BadRequestException("Invalid input for checking room availability");
+        }
         RoomEntity roomToCheck = roomsService.getRoomById(roomId);
         if (roomToCheck == null) {
-            return false;
+            throw new ResourceNotFoundException("Room is not exist");
         }
         List<BookingEntity> bookingsOfRoom = bookingRepository.findByRoom_RoomId(roomId);
         for (BookingEntity booking : bookingsOfRoom) {
@@ -290,7 +325,7 @@ public class BookingServiceImpl implements BookingService {
             }
 
             else if (checkOverLapping && (booking.getStatus().equals("PENDING") || booking.getStatus().equals("CONFIRMED"))) {
-                return false;
+                throw new ConflictException("Room is not available in selected time");
             }
         }
         return true;

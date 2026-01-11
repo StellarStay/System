@@ -1,5 +1,6 @@
 package code.controller.booking_contact;
 
+import code.exception.ResourceNotFoundException;
 import code.model.dto.booking_contact.BookingContactResponseDTO;
 import code.services.booking_contact.BookingContactService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +22,7 @@ public class BookingContactController {
         if (bookingContactResponseDTO != null) {
             return ResponseEntity.ok(bookingContactResponseDTO);
         } else {
-            return ResponseEntity.notFound().build();
+            throw new ResourceNotFoundException("BookingContact not found");
         }
     }
 }

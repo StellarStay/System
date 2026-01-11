@@ -1,9 +1,8 @@
 package code.controller.category;
 
-import code.model.dto.rooms.CategoryRoomRequestDTO;
-import code.model.dto.rooms.CategoryRoomResponseDTO;
+import code.model.dto.rooms.req.CategoryRoomRequestDTO;
+import code.model.dto.rooms.res.CategoryRoomResponseDTO;
 import code.services.rooms.CategoryRoomService;
-import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;

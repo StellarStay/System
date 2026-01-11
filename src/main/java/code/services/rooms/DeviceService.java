@@ -1,7 +1,7 @@
 package code.services.rooms;
 
-import code.model.dto.rooms.DeviceRequestDTO;
-import code.model.dto.rooms.DeviceResponseDTO;
+import code.model.dto.rooms.req.DeviceRequestDTO;
+import code.model.dto.rooms.res.DeviceResponseDTO;
 import code.model.entity.rooms.DevicesEntity;
 
 import java.util.List;

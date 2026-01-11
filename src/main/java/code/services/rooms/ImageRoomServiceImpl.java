@@ -1,10 +1,10 @@
 package code.services.rooms;
 
-import code.model.dto.rooms.ImageRoomRequestDTO;
+import code.exception.BadRequestException;
+import code.model.dto.rooms.req.ImageRoomRequestDTO;
 import code.model.entity.rooms.ImageRoomEntity;
 import code.model.entity.rooms.RoomEntity;
 import code.repository.rooms.ImageRoomRepository;
-import code.repository.rooms.RoomRepository;
 import code.services.s3.S3Service;
 import code.util.RandomId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,9 +36,12 @@ public class ImageRoomServiceImpl implements ImageRoomService {
     @Override
     public boolean insertImageRoom(String roomId, List<MultipartFile> images) {
         try {
+            if (roomId == null) {
+                throw new BadRequestException("RoomId is null");
+            }
             RoomEntity roomEntity = roomsService.getRoomById(roomId);
             if (roomEntity == null) {
-                return false;
+                throw new BadRequestException("Room is not found");
             }
             // Bước 2: Upload ảnh lên S3 và tạo ImageRoomEntity
             if (images != null && !images.isEmpty()) {

@@ -1,11 +1,10 @@
-package code.model.dto.rooms;
+package code.model.dto.rooms.req;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 @Data
 @AllArgsConstructor

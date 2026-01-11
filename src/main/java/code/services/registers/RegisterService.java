@@ -1,6 +1,6 @@
 package code.services.registers;
 
-import code.model.dto.users.UserRequestDTO;
+import code.model.dto.users.req.UserRequestDTO;
 import jakarta.mail.MessagingException;
 
 import java.util.Map;

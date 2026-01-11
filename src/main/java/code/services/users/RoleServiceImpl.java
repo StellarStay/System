@@ -1,6 +1,8 @@
 package code.services.users;
 
-import code.model.dto.users.RoleRequestDTO;
+import code.exception.BadRequestException;
+import code.exception.ResourceNotFoundException;
+import code.model.dto.users.req.RoleRequestDTO;
 import code.model.entity.users.RoleEntity;
 import code.repository.users.RoleRepository;
 import code.util.RandomId;
@@ -26,9 +28,12 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public boolean updateRole(String roleId, RoleRequestDTO roleRequestDTO) {
+        if (roleId == null || roleRequestDTO == null) {
+            throw new BadRequestException("RoleId and RoleRequestDTO is null");
+        }
         RoleEntity roleEntity = roleRepository.findById(roleId).orElse(null);
         if (roleEntity == null) {
-            return false;
+            throw new ResourceNotFoundException("RoleEntity is null");
         } else {
             roleEntity.setRoleName(roleRequestDTO.getRoleName());
             roleEntity.setDescription(roleRequestDTO.getDescription());
@@ -39,9 +44,12 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public boolean deleteRole(String roleId) {
+        if (roleId == null) {
+            throw new BadRequestException("RoleId and RoleRequestDTO is null");
+        }
         RoleEntity roleEntity = roleRepository.findById(roleId).orElse(null);
         if (roleEntity == null) {
-            return false;
+            throw new ResourceNotFoundException("RoleEntity is null");
         } else {
             roleRepository.delete(roleEntity);
             return true;
@@ -55,6 +63,9 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public RoleEntity getRoleById(String roleId) {
+        if (roleId == null) {
+            throw new BadRequestException("RoleId is null");
+        }
         return roleRepository.findById(roleId).orElse(null);
     }
 }

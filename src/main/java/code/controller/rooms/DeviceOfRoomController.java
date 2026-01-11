@@ -1,7 +1,7 @@
 package code.controller.rooms;
 
-import code.model.dto.rooms.DeviceOfRoomRequestDTO;
-import code.model.dto.rooms.DeviceOfRoomUpdateDTO;
+import code.model.dto.rooms.req.DeviceOfRoomRequestDTO;
+import code.model.dto.rooms.req.DeviceOfRoomUpdateDTO;
 import code.services.rooms.DeviceOfRoomService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

@@ -1,7 +1,7 @@
 package code.services.rooms;
 
-import code.model.dto.rooms.CategoryRoomRequestDTO;
-import code.model.dto.rooms.CategoryRoomResponseDTO;
+import code.model.dto.rooms.req.CategoryRoomRequestDTO;
+import code.model.dto.rooms.res.CategoryRoomResponseDTO;
 import code.model.entity.rooms.CategoriesRoomEntity;
 
 import java.util.List;

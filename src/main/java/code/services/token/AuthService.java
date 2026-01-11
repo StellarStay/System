@@ -1,5 +1,9 @@
 package code.services.token;
 
+import code.exception.BadRequestException;
+import code.exception.InvalidCredentialsException;
+import code.exception.ResourceNotFoundException;
+import code.exception.UnauthorizedException;
 import code.model.dto.login.AuthResponseDTO;
 import code.model.dto.login.LoginRequestDTO;
 import code.model.dto.login.RefreshTokenRequestDTO;
@@ -25,11 +29,11 @@ public class AuthService {
         // Lấy user từ database dựa trên email
         UserEntity user = userRepository.findByEmail(req.getEmail());
         if (user == null) {
-            throw new RuntimeException("User not found");
+            throw new InvalidCredentialsException("Email is not exist");
         }
         // So sánh password từ request với password đã mã hóa trong database
         if (!encoder.matches(req.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Invalid credentials");
+            throw new InvalidCredentialsException("Password is incorrect");
         }
 
         String userId = String.valueOf(user.getUserId());
@@ -53,11 +57,11 @@ public class AuthService {
         Claims claims = jwtService.parseClaims(req.getRefreshToken());
         // Kiểm tra loại token có phải là refresh token không
         if (!"refresh".equals(claims.get("type", String.class))) {
-            throw new RuntimeException("Invalid token type");
+            throw new BadRequestException("Invalid token type");
         }
         // Kiểm tra refresh token có hết hạn không
         if (jwtService.isExpired(claims)) {
-            throw new RuntimeException("Refresh token expired");
+            throw new UnauthorizedException("Refresh token expired");
         }
         // Lấy userId và jti từ claims
         String userId = claims.getSubject();
@@ -68,15 +72,15 @@ public class AuthService {
         // Lấy jti đã lưu trong Redis
         String storedJti = refreshStore.getJti(userId);
         if (storedJti == null) {
-            throw new RuntimeException("Session expired. Please login again.");
+            throw new UnauthorizedException("Session expired. Please login again");
         }
         // So sánh jti của token với jti đã lưu
         if (!storedJti.equals(jti)) {
-            throw new RuntimeException("Refresh token is revoked");
+            throw new UnauthorizedException("Refresh token is revoked");
         }
 
         UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         // Tạo access token mới
         String newAccess = jwtService.generateAccessToken(userId, user.getEmail(), user.getRole().getRoleName());

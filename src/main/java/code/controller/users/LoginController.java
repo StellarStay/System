@@ -1,10 +1,10 @@
 package code.controller.users;
 
+import code.exception.UnauthorizedException;
 import code.model.dto.login.AuthResponseDTO;
 import code.model.dto.login.LoginRequestDTO;
 import code.model.dto.login.RefreshTokenRequestDTO;
-import code.model.dto.users.UserResponseDTO;
-import code.model.entity.users.UserEntity;
+import code.model.dto.users.res.UserResponseDTO;
 import code.services.token.AuthService;
 import code.services.users.UserService;
 import jakarta.servlet.http.Cookie;
@@ -67,9 +67,6 @@ public class LoginController {
 
     @PostMapping("/logout")
     public ResponseEntity<String> logout(Authentication authentication, HttpServletResponse response) {
-        if (authentication == null) {
-            return ResponseEntity.ok("No user logged in");
-        }
 
         String userId = (String) authentication.getPrincipal();
         authService.logout(userId);
@@ -90,11 +87,6 @@ public class LoginController {
 
     @GetMapping("/me")
     public ResponseEntity<UserResponseDTO> getCurrentUser(Authentication authentication) {
-        if (authentication == null) {
-            // 401 is authentication error
-            // 403 is authorization error
-            return ResponseEntity.status(401).build();
-        }
 
         String userId = (String) authentication.getPrincipal();
         UserResponseDTO user = userService.getUserResponseDTO(userId);

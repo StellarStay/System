@@ -1,5 +1,7 @@
 package code.services.payments;
 
+import code.exception.BadRequestException;
+import code.exception.ResourceNotFoundException;
 import code.model.dto.booking.TempBookingBeforePaymentDTO;
 import code.model.dto.momo.MomoRequestDTO;
 import code.model.dto.momo.MomoResponseDTO;
@@ -67,7 +69,7 @@ public class PaymentServiceImpl implements  PaymentService {
         // Lấy thông tin đơn hàng từ Redis
         TempBookingBeforePaymentDTO tempBooking = tempBookingService.get(paymentRequestDTO.getTempBookingId());
         if (tempBooking == null) {
-            throw new RuntimeException("Temp Booking not found");
+            throw new ResourceNotFoundException("Temp Booking not found");
         }
 
         // Tạo yêu cầu thanh toán tới momo
@@ -108,25 +110,25 @@ public class PaymentServiceImpl implements  PaymentService {
 
         // Nếu thanh toán thất bại, return false
         if (resultCode != 0) {
-            return false;
+            throw new BadRequestException("Payment failed !!!");
         }
 
         // Lấy thông tin booking tạm từ Redis
         TempBookingBeforePaymentDTO tempBookingBeforePaymentDTO = tempBookingService.get(tempBookingId);
         if (tempBookingBeforePaymentDTO == null) {
-            throw new RuntimeException("Temp Booking not found");
+            throw new ResourceNotFoundException("Temp Booking not found");
         }
 
         // Lấy paymentMethodId từ TempBooking (đã được set trước đó)
         String paymentMethodId = tempBookingBeforePaymentDTO.getPaymentMethodId();
         if (paymentMethodId == null || paymentMethodId.isEmpty()) {
-            throw new RuntimeException("Payment method not selected");
+            throw new ResourceNotFoundException("Payment method not found in temp booking in Redis");
         }
 
         // Tạo booking chính thức từ temp booking
         BookingEntity bookingEntity = bookingService.insertBookingFromTemp(tempBookingBeforePaymentDTO.getTempBookingId());
 
-        // Tạo booking contact nếu có (cho guest)
+        // Tạo booking contact (cho guest và cả user)
         if (tempBookingBeforePaymentDTO.getBookingContactRequestDTO() != null) {
             bookingContactService.insertBookingContact(bookingEntity, tempBookingBeforePaymentDTO.getBookingContactRequestDTO());
         }
@@ -134,7 +136,7 @@ public class PaymentServiceImpl implements  PaymentService {
         // Lấy payment method
         PaymentMethodEntity paymentMethod = paymentMethodService.getPaymentMethodByPaymentMethodId(paymentMethodId);
         if (paymentMethod == null) {
-            throw new RuntimeException("Payment method not found");
+            throw new ResourceNotFoundException("Payment method not found in database");
         }
 
         // Tạo payment record
@@ -214,6 +216,9 @@ public class PaymentServiceImpl implements  PaymentService {
     @Override
     public List<PaymentResponseDTO> getAllPayment() {
         List<PaymentEntity> list = paymentRepository.findAll();
+        if (list.isEmpty()) {
+            throw new ResourceNotFoundException("Payment List not found");
+        }
         List<PaymentResponseDTO> paymentResponseDTOList = new ArrayList<>();
         for (PaymentEntity paymentEntity : list) {
            PaymentResponseDTO paymentResponseDTO = new PaymentResponseDTO();

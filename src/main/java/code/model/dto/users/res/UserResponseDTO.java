@@ -1,4 +1,4 @@
-package code.model.dto.users;
+package code.model.dto.users.res;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

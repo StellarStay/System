@@ -1,6 +1,6 @@
 package code.services.rooms;
 
-import code.model.dto.rooms.ImageRoomRequestDTO;
+import code.model.dto.rooms.req.ImageRoomRequestDTO;
 import code.model.entity.rooms.ImageRoomEntity;
 import org.springframework.web.multipart.MultipartFile;
 

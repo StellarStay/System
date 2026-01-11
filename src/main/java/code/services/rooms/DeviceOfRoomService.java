@@ -1,8 +1,8 @@
 package code.services.rooms;
 
-import code.model.dto.rooms.DeviceOfRoomRequestDTO;
-import code.model.dto.rooms.DeviceOfRoomResponseDTO;
-import code.model.dto.rooms.DeviceOfRoomUpdateDTO;
+import code.model.dto.rooms.req.DeviceOfRoomRequestDTO;
+import code.model.dto.rooms.res.DeviceOfRoomResponseDTO;
+import code.model.dto.rooms.req.DeviceOfRoomUpdateDTO;
 
 
 import java.util.List;

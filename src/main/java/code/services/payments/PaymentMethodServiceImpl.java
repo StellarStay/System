@@ -1,5 +1,7 @@
 package code.services.payments;
 
+import code.exception.BadRequestException;
+import code.exception.ResourceNotFoundException;
 import code.model.dto.booking.TempBookingBeforePaymentDTO;
 import code.model.dto.payments.PaymentMethodRequestDTO;
 import code.model.entity.payments.PaymentMethodEntity;
@@ -31,6 +33,9 @@ public class PaymentMethodServiceImpl implements  PaymentMethodService {
     // Chức năng thêm phương thức thanh toán dành cho admin
     @Override
     public boolean addPaymentMethod(PaymentMethodRequestDTO paymentMethodRequestDTO) {
+        if (paymentMethodRequestDTO == null) {
+            throw new BadRequestException("Payment Method Request is null");
+        }
         PaymentMethodEntity paymentMethodEntity = new PaymentMethodEntity();
         paymentMethodEntity.setPaymentMethodId(generatePaymentMethodId());
         paymentMethodEntity.setPaymentMethodName(paymentMethodRequestDTO.getPaymentMethodName());
@@ -41,14 +46,17 @@ public class PaymentMethodServiceImpl implements  PaymentMethodService {
 
     @Override
     public boolean updatePaymentMethodId(String tempBookingId, String paymentMethodId) {
+        if (tempBookingId == null || paymentMethodId == null) {
+            throw new BadRequestException("Temp booking Id or Payment method Id is null");
+        }
         TempBookingBeforePaymentDTO tempBookingBeforePaymentDTO = tempBookingService.get(tempBookingId);
         if (tempBookingBeforePaymentDTO == null) {
-            throw new RuntimeException("Temp Booking not found");
+            throw new ResourceNotFoundException("Temp booking not found");
         }
 
         PaymentMethodEntity paymentMethod = paymentMethodRepository.findById(paymentMethodId).orElse(null);
         if (paymentMethod == null) {
-            throw new RuntimeException("Payment method not found");
+            throw new ResourceNotFoundException("Payment method not found");
         }
         tempBookingBeforePaymentDTO.setPaymentMethodId(paymentMethod.getPaymentMethodId());
         tempBookingService.save(tempBookingBeforePaymentDTO);
@@ -57,9 +65,12 @@ public class PaymentMethodServiceImpl implements  PaymentMethodService {
 
     @Override
     public boolean deletePaymentMethod(String paymentMethodId) {
+        if (paymentMethodId == null) {
+            throw new BadRequestException("Payment method Id is null");
+        }
         PaymentMethodEntity paymentMethodEntity = paymentMethodRepository.findById(paymentMethodId).orElse(null);
         if (paymentMethodEntity == null) {
-            return false;
+            throw new ResourceNotFoundException("Payment method not found");
         }
         paymentMethodRepository.delete(paymentMethodEntity);
         return true;
