@@ -2,6 +2,7 @@ package code.services.rooms;
 
 import code.exception.BadRequestException;
 import code.exception.ResourceNotFoundException;
+import code.mapper.RoomMapper;
 import code.model.dto.rooms.req.RoomRequestDTO;
 import code.model.dto.rooms.res.RoomResponseDTO;
 import code.model.entity.rooms.CategoriesRoomEntity;
@@ -13,7 +14,10 @@ import code.services.s3.S3Service;
 import code.services.users.UserService;
 import code.util.RandomId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -32,6 +36,8 @@ public class RoomsServiceImpl implements RoomsService{
     private ImageRoomRepository imageRoomRepository;
     @Autowired
     private S3Service s3Service;
+    @Autowired
+    private RoomMapper roomMapper;
 
     private final int MAX_LENGTH_ROOM_ID = 10;
     private final int MAX_LENGTH_IMAGE_ID = 15;
@@ -81,6 +87,7 @@ public class RoomsServiceImpl implements RoomsService{
     }
 
     @Override
+    @CacheEvict(value = "roomRandom", key = "'random3RoomsToAds'")
     public boolean updateRoom(String roomId, RoomRequestDTO roomRequestDTO) {
         if (roomId == null || roomRequestDTO == null) {
             throw new BadRequestException("RoomId or RoomRequestDTO is null");
@@ -106,6 +113,7 @@ public class RoomsServiceImpl implements RoomsService{
     }
 
     @Override
+    @CacheEvict(value = "roomRandom", key = "'random3RoomsToAds'")
     public boolean deleteRoom(String roomId) {
         if (roomId == null) {
             throw new BadRequestException("RoomId is null");
@@ -120,24 +128,14 @@ public class RoomsServiceImpl implements RoomsService{
     }
 
     @Override
-    public List<RoomResponseDTO> getAllRooms() {
-        List<RoomEntity> roomEntities = roomRepository.findAll();
+    public List<RoomResponseDTO> getAllRoomsForUser() {
+        List<RoomEntity> roomEntities = roomRepository.findAllRooms();
         if (roomEntities.isEmpty()) {
             throw new ResourceNotFoundException("Room List not found");
         }
         List<RoomResponseDTO> roomResponseDTOList = new ArrayList<>();
         for (RoomEntity room : roomEntities) {
-            RoomResponseDTO roomResponseDTO = new RoomResponseDTO();
-            roomResponseDTO.setRoomId(room.getRoomId());
-            roomResponseDTO.setRoomName(room.getRoomName());
-            roomResponseDTO.setTitle(room.getTitle());
-            roomResponseDTO.setDescription(room.getDescription());
-            roomResponseDTO.setAddress(room.getAddress());
-            roomResponseDTO.setPrice_per_night(room.getPrice_per_night());
-            roomResponseDTO.setMax_guests(room.getMax_guests());
-            roomResponseDTO.setStatus(room.getStatus());
-            roomResponseDTO.setCategoryName(room.getCategory().getCategoryName());
-            roomResponseDTO.setOwnerName(room.getOwner().getFirstName() + " " + room.getOwner().getLastName());
+            RoomResponseDTO roomResponseDTO = roomMapper.toRoomResponseDTO(room);
             roomResponseDTOList.add(roomResponseDTO);
         }
         return  roomResponseDTOList;
@@ -160,18 +158,7 @@ public class RoomsServiceImpl implements RoomsService{
         if (roomEntity == null) {
             throw new ResourceNotFoundException("Room not found");
         }
-        RoomResponseDTO roomResponseDTO = new RoomResponseDTO();
-        roomResponseDTO.setRoomId(roomEntity.getRoomId());
-        roomResponseDTO.setRoomName(roomEntity.getRoomName());
-        roomResponseDTO.setTitle(roomEntity.getTitle());
-        roomResponseDTO.setDescription(roomEntity.getDescription());
-        roomResponseDTO.setAddress(roomEntity.getAddress());
-        roomResponseDTO.setPrice_per_night(roomEntity.getPrice_per_night());
-        roomResponseDTO.setMax_guests(roomEntity.getMax_guests());
-        roomResponseDTO.setStatus(roomEntity.getStatus());
-        roomResponseDTO.setCategoryName(roomEntity.getCategory().getCategoryName());
-        roomResponseDTO.setOwnerName(roomEntity.getOwner().getFirstName() + " " + roomEntity.getOwner().getLastName());
-        return roomResponseDTO;
+        return roomMapper.toRoomResponseDTO(roomEntity);
     }
 
     @Override
@@ -179,24 +166,14 @@ public class RoomsServiceImpl implements RoomsService{
         if (minPrice == null || maxPrice == null || minPrice.compareTo(BigDecimal.ZERO) < 0 || maxPrice.compareTo(BigDecimal.ZERO) < 0) {
             throw new BadRequestException("MinPrice or MaxPrice is null or negative");
         }
-        List<RoomEntity> roomEntityList = roomRepository.findAll();
+        List<RoomEntity> roomEntityList = roomRepository.findAllRooms();
         if (roomEntityList.isEmpty()){
             throw new ResourceNotFoundException("Room List not found");
         }
         List<RoomResponseDTO> roomResponseDTOList = new ArrayList<>();
         for (RoomEntity room : roomEntityList) {
             if (room.getPrice_per_night().compareTo(minPrice) >= 0 && room.getPrice_per_night().compareTo(maxPrice) <= 0) {
-                RoomResponseDTO roomResponseDTO = new RoomResponseDTO();
-                roomResponseDTO.setRoomId(room.getRoomId());
-                roomResponseDTO.setRoomName(room.getRoomName());
-                roomResponseDTO.setTitle(room.getTitle());
-                roomResponseDTO.setDescription(room.getDescription());
-                roomResponseDTO.setAddress(room.getAddress());
-                roomResponseDTO.setPrice_per_night(room.getPrice_per_night());
-                roomResponseDTO.setMax_guests(room.getMax_guests());
-                roomResponseDTO.setStatus(room.getStatus());
-                roomResponseDTO.setCategoryName(room.getCategory().getCategoryName());
-                roomResponseDTO.setOwnerName(room.getOwner().getFirstName() + " " + room.getOwner().getLastName());
+                RoomResponseDTO roomResponseDTO = roomMapper.toRoomResponseDTO(room);
                 roomResponseDTOList.add(roomResponseDTO);
             }
         }
@@ -208,24 +185,14 @@ public class RoomsServiceImpl implements RoomsService{
         if (maxGuests <= 0) {
             throw new BadRequestException("MaxGuests is invalid");
         }
-        List<RoomEntity> roomEntityList = roomRepository.findAll();
+        List<RoomEntity> roomEntityList = roomRepository.findAllRooms();;
         if (roomEntityList.isEmpty()){
             throw new ResourceNotFoundException("Room List not found");
         }
         List<RoomResponseDTO> roomResponseDTOList = new ArrayList<>();
         for (RoomEntity room : roomEntityList) {
             if (room.getMax_guests() == maxGuests) {
-                RoomResponseDTO roomResponseDTO = new RoomResponseDTO();
-                roomResponseDTO.setRoomId(room.getRoomId());
-                roomResponseDTO.setRoomName(room.getRoomName());
-                roomResponseDTO.setTitle(room.getTitle());
-                roomResponseDTO.setDescription(room.getDescription());
-                roomResponseDTO.setAddress(room.getAddress());
-                roomResponseDTO.setPrice_per_night(room.getPrice_per_night());
-                roomResponseDTO.setMax_guests(room.getMax_guests());
-                roomResponseDTO.setStatus(room.getStatus());
-                roomResponseDTO.setCategoryName(room.getCategory().getCategoryName());
-                roomResponseDTO.setOwnerName(room.getOwner().getFirstName() + " " + room.getOwner().getLastName());
+                RoomResponseDTO roomResponseDTO = roomMapper.toRoomResponseDTO(room);
                 roomResponseDTOList.add(roomResponseDTO);
             }
         }
@@ -234,24 +201,14 @@ public class RoomsServiceImpl implements RoomsService{
 
     @Override
     public List<RoomResponseDTO> getRoomByAddress(String address) {
-        List<RoomEntity> roomEntityList = roomRepository.findAll();
+        List<RoomEntity> roomEntityList = roomRepository.findAllRooms();
         if (roomEntityList.isEmpty()){
             throw new ResourceNotFoundException("Room List not found");
         }
         List<RoomResponseDTO> roomResponseDTOList = new ArrayList<>();
         for (RoomEntity room : roomEntityList) {
             if (room.getAddress().equals(address)) {
-                RoomResponseDTO roomResponseDTO = new RoomResponseDTO();
-                roomResponseDTO.setRoomId(room.getRoomId());
-                roomResponseDTO.setRoomName(room.getRoomName());
-                roomResponseDTO.setTitle(room.getTitle());
-                roomResponseDTO.setDescription(room.getDescription());
-                roomResponseDTO.setAddress(room.getAddress());
-                roomResponseDTO.setPrice_per_night(room.getPrice_per_night());
-                roomResponseDTO.setMax_guests(room.getMax_guests());
-                roomResponseDTO.setStatus(room.getStatus());
-                roomResponseDTO.setCategoryName(room.getCategory().getCategoryName());
-                roomResponseDTO.setOwnerName(room.getOwner().getFirstName() + " " + room.getOwner().getLastName());
+                RoomResponseDTO roomResponseDTO = roomMapper.toRoomResponseDTO(room);
                 roomResponseDTOList.add(roomResponseDTO);
             }
         }
@@ -260,24 +217,14 @@ public class RoomsServiceImpl implements RoomsService{
 
     @Override
     public List<RoomResponseDTO> getRoomByCategory(String categoryId) {
-        List<RoomEntity> roomEntityList = roomRepository.findAll();
+        List<RoomEntity> roomEntityList = roomRepository.findAllRooms();;
         if (roomEntityList.isEmpty()){
             throw new ResourceNotFoundException("Room List not found");
         }
         List<RoomResponseDTO> roomResponseDTOList = new ArrayList<>();
         for (RoomEntity room : roomEntityList) {
             if (room.getCategory().getCategoryId().equals(categoryId)) {
-                RoomResponseDTO roomResponseDTO = new RoomResponseDTO();
-                roomResponseDTO.setRoomId(room.getRoomId());
-                roomResponseDTO.setRoomName(room.getRoomName());
-                roomResponseDTO.setTitle(room.getTitle());
-                roomResponseDTO.setDescription(room.getDescription());
-                roomResponseDTO.setAddress(room.getAddress());
-                roomResponseDTO.setPrice_per_night(room.getPrice_per_night());
-                roomResponseDTO.setMax_guests(room.getMax_guests());
-                roomResponseDTO.setStatus(room.getStatus());
-                roomResponseDTO.setCategoryName(room.getCategory().getCategoryName());
-                roomResponseDTO.setOwnerName(room.getOwner().getFirstName() + " " + room.getOwner().getLastName());
+                RoomResponseDTO roomResponseDTO = roomMapper.toRoomResponseDTO(room);
                 roomResponseDTOList.add(roomResponseDTO);
             }
         }
@@ -295,21 +242,30 @@ public class RoomsServiceImpl implements RoomsService{
         }
         List<RoomResponseDTO> roomResponseDTOList = new ArrayList<>();
         for (RoomEntity room : bookedRooms) {
-            RoomResponseDTO roomResponseDTO = new RoomResponseDTO();
-
-            roomResponseDTO.setRoomId(room.getRoomId());
-            roomResponseDTO.setRoomName(room.getRoomName());
-            roomResponseDTO.setTitle(room.getTitle());
-            roomResponseDTO.setDescription(room.getDescription());
-            roomResponseDTO.setAddress(room.getAddress());
-            roomResponseDTO.setPrice_per_night(room.getPrice_per_night());
-            roomResponseDTO.setMax_guests(room.getMax_guests());
-            roomResponseDTO.setStatus(room.getStatus());
-            roomResponseDTO.setCategoryName(room.getCategory().getCategoryName());
-            roomResponseDTO.setOwnerName(room.getOwner().getFirstName() + " " + room.getOwner().getLastName());
-
+            RoomResponseDTO roomResponseDTO = roomMapper.toRoomResponseDTO(room);
             roomResponseDTOList.add(roomResponseDTO);
         }
         return  roomResponseDTOList;
     }
+
+    @Override
+    @Cacheable(
+            value = "roomRandom",
+            key = "'random3RoomsToAds'",
+            unless = "#result == null || #result.isEmpty()"
+    )
+    @Transactional(readOnly = true)
+    public List<RoomResponseDTO> getRandom3RoomsToAds() {
+        List<RoomEntity> roomEntityList = roomRepository.find3RoomsToAds();
+        if (roomEntityList.isEmpty() || roomEntityList.size() < 3){
+            throw new ResourceNotFoundException("Room List not found");
+        }
+        List<RoomResponseDTO> roomResponseDTOList = new ArrayList<>();
+        for (RoomEntity room : roomEntityList) {
+            RoomResponseDTO roomResponseDTO = roomMapper.toRoomResponseDTO(room);
+            roomResponseDTOList.add(roomResponseDTO);
+        }
+        return roomResponseDTOList;
+    }
+
 }

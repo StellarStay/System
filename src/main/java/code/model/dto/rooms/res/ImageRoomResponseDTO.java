@@ -1,4 +1,7 @@
 package code.model.dto.rooms.res;
 
-public class ImageRoomResponseDTO {
+public record ImageRoomResponseDTO(
+        String imageUrl,
+        boolean isThumbnail
+) {
 }

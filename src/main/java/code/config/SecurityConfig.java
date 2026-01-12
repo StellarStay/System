@@ -43,6 +43,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/s3/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/rooms/get/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/payment_method/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/rooms/devices/get_all_devices_of_room/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/rooms/images/{roomId}/**").permitAll()
 
                         // Admin-only endpoints
                         .requestMatchers("/api/users/create_user", "/api/users/get_all_users").hasRole("ADMIN")

@@ -27,4 +27,22 @@ public interface RoomRepository extends JpaRepository<RoomEntity,String> {
     """)
     List<RoomEntity> findAvailableRooms(@Param("checkIn") LocalDateTime checkIn, @Param("checkOut") LocalDateTime checkOut);
 
+    @Query("""
+    SELECT r FROM RoomEntity r
+    WHERE r.status = 'APPROVED'
+    ORDER BY FUNCTION('RANDOM')
+    LIMIT 3
+    """)
+    List<RoomEntity> find3RoomsToAds();
+
+
+    @Query("""
+    SELECT r FROM RoomEntity r
+    WHERE r.status = 'APPROVED'
+    """)
+    List<RoomEntity> findAllRooms();
+
+
+
+
 }

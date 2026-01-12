@@ -20,6 +20,8 @@ public class ImageRoomEntity {
     private String imageUrl;
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
+    @Column(name = "is_thumbnail", nullable = false)
+    private Boolean isThumbnail = false;
 
     @ManyToOne
     @JoinColumn(name = "room_id", nullable = false)

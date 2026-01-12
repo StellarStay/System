@@ -47,7 +47,7 @@ public class RoomController {
 
     @GetMapping("/get/getAllRooms")
     public ResponseEntity<List<RoomResponseDTO>> getAllRooms() {
-        List<RoomResponseDTO> roomResponseDTOS = roomsService.getAllRooms();
+        List<RoomResponseDTO> roomResponseDTOS = roomsService.getAllRoomsForUser();
         return ResponseEntity.ok(roomResponseDTOS);
     }
 
@@ -98,4 +98,9 @@ public class RoomController {
         return ResponseEntity.ok(rooms);
     }
 
+    @GetMapping("/get/random3RoomsToAds")
+    public ResponseEntity<List<RoomResponseDTO>> getRandom3RoomsToAds() {
+        List<RoomResponseDTO> rooms = roomsService.getRandom3RoomsToAds();
+        return ResponseEntity.ok(rooms);
+    }
 }
