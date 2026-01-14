@@ -36,5 +36,5 @@ build/
 src/main/resources/application.properties
 
 #docs
-docs/**
+docs/
 
